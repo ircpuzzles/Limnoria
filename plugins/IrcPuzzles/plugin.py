@@ -66,7 +66,7 @@ class IrcPuzzles(callbacks.Plugin):
         nick = msg.nick
         prefix = msg.prefix
         hostmask = '%s!%s' % (nick, prefix)
-        account = self._cache(hostmask)
+        account = self._cache[hostmask]
         for channel in msg.args[0].split(','):
             irc.queueMsg(ircmsgs.privmsg(channel,"I saw %s join with nickserv account %s" % (hostmask, account)))
 
