@@ -47,7 +47,7 @@ class IrcPuzzles(callbacks.Plugin):
     """A plugin to facilitate IRC Puzzles channel management and stats tracking"""
     threaded = True
     def __init__(self, irc):
-        super(NickAuth, self).__init__(irc)
+        super(IrcPuzzles, self).__init__(irc)
         self._requests = {}
         self._cache = {}
 
@@ -67,7 +67,7 @@ class IrcPuzzles(callbacks.Plugin):
         hostmask = '%s!%s' % (nick, prefix)
         account = self._cache(hostmask)
         irc.reply("I saw %s join with nickserv account %s" % (hostmask, account))
-        
+
     def do330(self, irc, msg):
         mynick, theirnick, theiraccount, garbage = msg.args
         # I would like to use a dict comprehension, but we have to support
