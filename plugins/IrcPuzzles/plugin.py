@@ -56,7 +56,7 @@ class IrcPuzzles(callbacks.Plugin):
         nick = msg.nick
         prefix = msg.prefix
         hostmask = '%s!%s' % (nick, prefix)
-        if hostmask in self._cache:
+        if nick in self._cache:
             self._doJoin(irc, msg)
         else:
             self._requests[(irc.network, nick)] = (self._doJoin, irc, msg)
@@ -66,7 +66,7 @@ class IrcPuzzles(callbacks.Plugin):
         nick = msg.nick
         prefix = msg.prefix
         hostmask = '%s!%s' % (nick, prefix)
-        account = self._cache[hostmask]
+        account = self._cache[nick]
         for channel in msg.args[0].split(','):
             irc.queueMsg(ircmsgs.privmsg(channel,"I saw %s join with nickserv account %s" % (hostmask, account)))
 
@@ -78,6 +78,7 @@ class IrcPuzzles(callbacks.Plugin):
             callback = self._requests.pop((irc.network, theirnick))
         except KeyError:
             return
+        self._cache[theirnick] = theiraccount
         callback[0](*callback[1:])
 
 
