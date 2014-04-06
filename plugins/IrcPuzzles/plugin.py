@@ -35,6 +35,7 @@ from supybot.commands import *
 import supybot.plugins as plugins
 import supybot.ircutils as ircutils
 import supybot.callbacks as callbacks
+import supybot.ircmsgs as ircmsgs
 try:
     from supybot.i18n import PluginInternationalization
     _ = PluginInternationalization('IrcPuzzles')
@@ -66,7 +67,8 @@ class IrcPuzzles(callbacks.Plugin):
         prefix = msg.prefix
         hostmask = '%s!%s' % (nick, prefix)
         account = self._cache(hostmask)
-        irc.reply("I saw %s join with nickserv account %s" % (hostmask, account))
+        for channel in msg.args[0].split(','):
+            irc.queueMsg(ircmsgs.privmsg(channel,"I saw %s join with nickserv account %s" % (hostmask, account)))
 
     def do330(self, irc, msg):
         mynick, theirnick, theiraccount, garbage = msg.args
