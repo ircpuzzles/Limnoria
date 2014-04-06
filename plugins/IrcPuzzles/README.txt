@@ -1,1 +1,1 @@
-Insert a description of your plugin here, with any notes, etc. about using it.
+A plugin to facilitate IRC Puzzles channel management and stats tracking

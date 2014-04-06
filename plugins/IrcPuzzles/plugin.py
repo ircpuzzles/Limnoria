@@ -28,6 +28,8 @@
 
 ###
 
+import time
+
 import supybot.utils as utils
 from supybot.commands import *
 import supybot.plugins as plugins
@@ -42,9 +44,39 @@ except ImportError:
     _ = lambda x:x
 
 class IrcPuzzles(callbacks.Plugin):
-    """Add the help for "@plugin help IrcPuzzles" here
-    This should describe *how* to use this plugin."""
+    """A plugin to facilitate IRC Puzzles channel management and stats tracking"""
     threaded = True
+    def __init__(self, irc):
+        super(NickAuth, self).__init__(irc)
+        self._requests = {}
+        self._cache = {}
+
+    def doJoin(self, irc, msg):
+        nick = msg.nick
+        prefix = msg.prefix
+        hostmask = '%s!%s' % (nick, prefix)
+        if hostmask in self._cache:
+            self._doJoin(irc, msg)
+        else:
+            self._requests[(irc.network, nick)] = (self._doJoin, irc, msg)
+            irc.queueMsg(ircmsgs.whois(nick, nick))
+
+    def _doJoin(self, irc, msg):
+        nick = msg.nick
+        prefix = msg.prefix
+        hostmask = '%s!%s' % (nick, prefix)
+        account = self._cache(hostmask)
+        irc.reply("I saw %s join with nickserv account %s" % (hostmask, account))
+        
+    def do330(self, irc, msg):
+        mynick, theirnick, theiraccount, garbage = msg.args
+        # I would like to use a dict comprehension, but we have to support
+        # Python 2.6 :(
+        try:
+            callback = self._requests.pop((irc.network, theirnick))
+        except KeyError:
+            return
+        callback[0](*callback[1:])
 
 
 Class = IrcPuzzles
