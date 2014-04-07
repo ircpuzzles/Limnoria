@@ -110,7 +110,7 @@ class IrcPuzzles(callbacks.Plugin):
             return
         account = self._cache[msg.nick]
         code_found = False
-        users = session.query(User).filter(User.account == account)
+        users = list(session.query(User).filter(User.account == account))
         if len(users) < 1:
             irc.reply("No user was found with your NickServ account. Please try registering again.")
             return
