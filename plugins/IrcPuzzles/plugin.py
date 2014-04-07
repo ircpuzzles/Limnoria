@@ -66,10 +66,7 @@ class IrcPuzzles(callbacks.Plugin):
         self.processAccount(irc, msg, nick, (self._whataccount, irc, msg, args, nick))
 
     def _whataccount(self, irc, msg, args, nick):
-        if nick not in self._cache:
-            irc.reply("\"%s\" is not identified with NickServ." % nick)
-        else:
-            irc.reply("\"%s\" is identified as \"%s\"." % (nick, self._cache[nick]))
+        irc.reply("\"%s\" is identified as \"%s\"." % (nick, self._cache[nick]))
 
     whataccount = wrap(whataccount, ['text'])
 
@@ -85,7 +82,6 @@ class IrcPuzzles(callbacks.Plugin):
             irc.queueMsg(ircmsgs.privmsg(channel,"I saw %s join with nickserv account %s" % (prefix, account)))
 
     def do330(self, irc, msg):
-        print(msg.args)
         mynick, theirnick, theiraccount, garbage = msg.args
         # I would like to use a dict comprehension, but we have to support
         # Python 2.6 :(
@@ -93,8 +89,7 @@ class IrcPuzzles(callbacks.Plugin):
             callback = self._requests.pop((irc.network, theirnick))
         except KeyError:
             return
-        if theiraccount:
-            self._cache[theirnick] = theiraccount
+        self._cache[theirnick] = theiraccount
         callback[0](*callback[1:])
 
 
