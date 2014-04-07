@@ -54,7 +54,7 @@ class IrcPuzzles(callbacks.Plugin):
 
     def processAccount(self, irc, msg, nick, callback):
         if nick in self._cache:
-            self._whatAccount(irc, msg)
+            callback[0](callback[1:])
         else:
             self._requests[(irc.network, nick)] = (callback, irc, msg, args, nick)
             irc.queueMsg(ircmsgs.whois(nick, nick))
@@ -63,7 +63,7 @@ class IrcPuzzles(callbacks.Plugin):
         """<nick>
 
         Get the account name for a nick."""
-        self.processAccount(nick, (self._whataccount, irc, msg, args, nick))
+        self.processAccount(irc, msg, nick, (self._whataccount, irc, msg, args, nick))
 
     def _whataccount(self, irc, msg, args, nick):
         if nick not in self._cache:
@@ -75,7 +75,7 @@ class IrcPuzzles(callbacks.Plugin):
 
     def doJoin(self, irc, msg):
         nick = msg.nick
-        self.processAccount(nick,(self._doJoin, irc, msg))
+        self.processAccount(irc, msg, nick,(self._doJoin, irc, msg))
 
     def _doJoin(self, irc, msg):
         nick = msg.nick
