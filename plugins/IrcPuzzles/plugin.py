@@ -51,8 +51,16 @@ class IrcPuzzles(callbacks.Plugin):
         super(IrcPuzzles, self).__init__(irc)
         self._requests = {}
         self._cache = {}
+        self.processChannels(irc)
 
-    def processAccount(self, irc, msg, nick, callback=(lambda x:None, None)):
+    def processChannels(self, irc):
+        for (channel, c) in irc.state.channels.iteritems():
+            for u in c.users:
+                if u not in self._cache:
+                    self.processAccount(irc, u)
+
+
+    def processAccount(self, irc, nick, callback=(lambda x:None, None)):
         if nick in self._cache:
             callback[0](*callback[1:])
         else:
@@ -71,16 +79,22 @@ class IrcPuzzles(callbacks.Plugin):
         if not inchan:
             irc.reply("\"%s\" is not in any of my channels." % nick)
             return
-        self.processAccount(irc, msg, nick, (self._whataccount, irc, msg, args, nick))
+        self.processAccount(irc, nick, (self._whataccount, irc, msg, args, nick))
 
     def _whataccount(self, irc, msg, args, nick):
         irc.reply("\"%s\" is identified as \"%s\"." % (nick, self._cache[nick]))
 
     whataccount = wrap(whataccount, ['text'])
 
+    def getcache(self, irc, msg, args):
+        """Return the raw cache for debugging"""
+        irc.reply(str(self._cache))
+
+    getcache = wrap(getcache, [])
+
     def doJoin(self, irc, msg):
         nick = msg.nick
-        self.processAccount(irc, msg, nick,(self._doJoin, irc, msg))
+        self.processAccount(irc, nick,(self._doJoin, irc, msg))
 
     def _doJoin(self, irc, msg):
         nick = msg.nick
@@ -88,7 +102,7 @@ class IrcPuzzles(callbacks.Plugin):
         account = self._cache.get(nick,'<None>')
 
     def doNick(self, irc, msg):
-        self.processAccount(irc, msg, msg.args[0], (self._doNick, irc, msg))
+        self.processAccount(irc, msg.args[0], (self._doNick, irc, msg))
 
     def _doNick(self, irc, msg):
         oldnick = msg.nick
