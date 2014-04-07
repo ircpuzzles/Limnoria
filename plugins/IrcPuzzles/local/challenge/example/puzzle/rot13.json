@@ -1,0 +1,11 @@
+{
+  "name": "Rot13 Easy",
+  "creator": "apoc",
+  "topic": "ebgfbyhgvba",
+  "solution": {
+    "correct": "rotsolution",
+    "other": ["othersolution"],
+    "incorrect": ["thatsnotit"]
+  }
+}
+
