@@ -102,6 +102,9 @@ class IrcPuzzles(callbacks.Plugin):
         self.processAccount(irc, msg.nick, (self._confirm, irc, msg, args, code))
 
     def _confirm(self, irc, msg, args, code):
+        """<code>
+
+        Confirm a user registration"""
         if msg.nick not in self._cache:
             irc.reply("You are not identified to NickServ. Please identify and try again.")
             return
