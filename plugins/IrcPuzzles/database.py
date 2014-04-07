@@ -1,6 +1,11 @@
-from sqlalchemy import create_engine, orm, Column, Integer, String, Boolean, Base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine, orm, Column, Integer, String, Boolean
+from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.ext.declarative import declarative_base
+
 engine = create_engine('sqlite:///ircpuzzles.db')
+session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
+Base = declarative_base()
+Base.query = session.query_property()
 
 class User(Base):
     __tablename__ = 'users'
@@ -15,5 +20,5 @@ class User(Base):
         return "<User(account='%s', confirmed='%s')>" % (self.account, str(self.confirmed))
 
 
-session = sessionmaker(bind=engine)
+
 Base.metadata.create_all(engine)
