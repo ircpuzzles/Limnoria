@@ -63,6 +63,13 @@ class IrcPuzzles(callbacks.Plugin):
         """<nick>
 
         Get the account name for a nick."""
+        inchan = False
+        for (channel, c) in irc.state.channels.iteritems():
+                if nick in c.users:
+                    inchan = True
+        if not inchan:
+            self.reply("\"%s\" is not in any of my channels." % nick)
+            return
         self.processAccount(irc, msg, nick, (self._whataccount, irc, msg, args, nick))
 
     def _whataccount(self, irc, msg, args, nick):
@@ -78,9 +85,7 @@ class IrcPuzzles(callbacks.Plugin):
         nick = msg.nick
         prefix = msg.prefix
         account = self._cache.get(nick,'<None>')
-        for channel in msg.args[0].split(','):
-            irc.queueMsg(ircmsgs.privmsg(channel,"I saw \"%s\" join with nickserv account \"%s\"" % (prefix, account)))
-
+        
     def doNick(self, irc, msg):
         self.processAccount(irc, msg, msg.args[0], (self._doNick, irc, msg))
 
@@ -89,9 +94,6 @@ class IrcPuzzles(callbacks.Plugin):
         newnick = msg.args[0]
         if oldnick in self._cache:
             del self._cache[oldnick]
-            for (channel, c) in irc.state.channels.iteritems():
-                if newnick in c.users:
-                    irc.queueMsg(ircmsgs.privmsg(channel,"I saw \"%s\" change nicks to \"%s\"" % (oldnick, newnick)))
 
     def doPart(self, irc, msg):
         for (channel, c) in irc.state.channels.iteritems():
