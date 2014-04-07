@@ -131,7 +131,7 @@ class IrcPuzzles(callbacks.Plugin):
         callback[0](*callback[1:])
 
     def do352(self, irc, msg):
-        mynick, channel, username, hostname, server, nick, perms, realname = msg
+        (mynick, channel, username, hostname, server, nick, perms, realname) = msg
         if nick not in self._cache:
             self.processAccount(irc, nick)
 
