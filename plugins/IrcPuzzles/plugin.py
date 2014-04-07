@@ -46,7 +46,7 @@ except ImportError:
 
 class IrcPuzzles(callbacks.Plugin):
     """A plugin to facilitate IRC Puzzles channel management and stats tracking"""
-    threaded = True
+    threaded = False
     def __init__(self, irc):
         super(IrcPuzzles, self).__init__(irc)
         self._requests = {}
@@ -60,7 +60,9 @@ class IrcPuzzles(callbacks.Plugin):
             irc.queueMsg(ircmsgs.whois(nick, nick))
 
     def whatAccount(self, irc, msg, args, nick):
-        """Get the account name for a nick."""
+        """<nick>
+
+        Get the account name for a nick."""
         self.processAccount(nick, (self._whatAccount, irc, msg, args, nick))
 
     def _whatAccount(self, irc, msg, args, nick):
