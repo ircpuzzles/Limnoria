@@ -68,7 +68,7 @@ class IrcPuzzles(callbacks.Plugin):
                 if nick in c.users:
                     inchan = True
         if not inchan:
-            self.reply("\"%s\" is not in any of my channels." % nick)
+            irc.reply("\"%s\" is not in any of my channels." % nick)
             return
         self.processAccount(irc, msg, nick, (self._whataccount, irc, msg, args, nick))
 
