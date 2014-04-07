@@ -85,7 +85,7 @@ class IrcPuzzles(callbacks.Plugin):
         nick = msg.nick
         prefix = msg.prefix
         account = self._cache.get(nick,'<None>')
-        
+
     def doNick(self, irc, msg):
         self.processAccount(irc, msg, msg.args[0], (self._doNick, irc, msg))
 
@@ -100,7 +100,7 @@ class IrcPuzzles(callbacks.Plugin):
                 if msg.nick in c.users:
                     return
         if msg.nick in self._cache:
-            del self._cache[oldnick]
+            del self._cache[msg.nick]
 
     def do330(self, irc, msg):
         mynick, theirnick, theiraccount, garbage = msg.args
