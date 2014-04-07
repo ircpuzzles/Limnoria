@@ -52,23 +52,34 @@ class IrcPuzzles(callbacks.Plugin):
         self._requests = {}
         self._cache = {}
 
+    def processAccount(self, irc, msg, nick, callback):
+        if nick in self._cache:
+            self._whatAccount(irc, msg)
+        else:
+            self._requests[(irc.network, nick)] = (callback, irc, msg, args, nick)
+            irc.queueMsg(ircmsgs.whois(nick, nick))
+
+    def whatAccount(self, irc, msg, args, nick):
+        self.processAccount(nick, (self._whatAccount, irc, msg, args, nick))
+
+    def _whatAccount(self, irc, msg, args, nick):
+        if nick not in self._cache:
+            irc.reply("\"%s\" is not identified with NickServ." % nick)
+        else:
+            irc.reply("\"%s\" is identified as \"%s\"." % (nick, self._cache[nick]))
+
+    whatAccount = wrap(whatAccount, ['text'])
+    
     def doJoin(self, irc, msg):
         nick = msg.nick
-        prefix = msg.prefix
-        hostmask = '%s!%s' % (nick, prefix)
-        if nick in self._cache:
-            self._doJoin(irc, msg)
-        else:
-            self._requests[(irc.network, nick)] = (self._doJoin, irc, msg)
-            irc.queueMsg(ircmsgs.whois(nick, nick))
+        self.processAccount(nick,(self._doJoin, irc, msg))
 
     def _doJoin(self, irc, msg):
         nick = msg.nick
         prefix = msg.prefix
-        hostmask = '%s!%s' % (nick, prefix)
-        account = self._cache[nick]
+        account = self._cache.get(nick,'<None>')
         for channel in msg.args[0].split(','):
-            irc.queueMsg(ircmsgs.privmsg(channel,"I saw %s join with nickserv account %s" % (hostmask, account)))
+            irc.queueMsg(ircmsgs.privmsg(channel,"I saw %s join with nickserv account %s" % (prefix, account)))
 
     def do330(self, irc, msg):
         mynick, theirnick, theiraccount, garbage = msg.args
