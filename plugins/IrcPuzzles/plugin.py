@@ -56,7 +56,7 @@ class IrcPuzzles(callbacks.Plugin):
         if nick in self._cache:
             callback[0](callback[1:])
         else:
-            self._requests[(irc.network, nick)] = (callback, irc, msg, args, nick)
+            self._requests[(irc.network, nick)] = callback
             irc.queueMsg(ircmsgs.whois(nick, nick))
 
     def whataccount(self, irc, msg, args, nick):
