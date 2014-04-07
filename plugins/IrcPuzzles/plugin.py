@@ -92,7 +92,8 @@ class IrcPuzzles(callbacks.Plugin):
             callback = self._requests.pop((irc.network, theirnick))
         except KeyError:
             return
-        self._cache[theirnick] = theiraccount
+        if theiraccount:
+            self._cache[theirnick] = theiraccount
         callback[0](*callback[1:])
 
 
