@@ -54,8 +54,8 @@ class IrcPuzzles(callbacks.Plugin):
         self.processChannels(irc)
 
     def processChannels(self, irc):
-        print(irc.state.channels.iteritems())
         for (channel, c) in irc.state.channels.iteritems():
+            print(channel,repr(c),list(c.users))
             for u in c.users:
                 if u not in self._cache and u != 'ircpuzzlesbot':
                     self.processAccount(irc, u)
