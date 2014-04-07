@@ -85,6 +85,7 @@ class IrcPuzzles(callbacks.Plugin):
             irc.queueMsg(ircmsgs.privmsg(channel,"I saw %s join with nickserv account %s" % (prefix, account)))
 
     def do330(self, irc, msg):
+        print(msg.args)
         mynick, theirnick, theiraccount, garbage = msg.args
         # I would like to use a dict comprehension, but we have to support
         # Python 2.6 :(
