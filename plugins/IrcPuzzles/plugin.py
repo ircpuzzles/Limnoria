@@ -56,7 +56,7 @@ class IrcPuzzles(callbacks.Plugin):
     def processChannels(self, irc):
         for (channel, c) in irc.state.channels.iteritems():
             for u in c.users:
-                if u not in self._cache:
+                if u not in self._cache and u != 'ircpuzzlesbot':
                     self.processAccount(irc, u)
 
 
@@ -93,13 +93,13 @@ class IrcPuzzles(callbacks.Plugin):
     getcache = wrap(getcache, [])
 
     def doJoin(self, irc, msg):
-        print(repr(msg))
         nick = msg.nick
-        self.processAccount(irc, nick,(self._doJoin, irc, msg))
+        if nick == 'ircpuzzlesbot':
+            self.processChannels(irc)
+            return
+        self.processAccount(irc, nick,(self._doJoin, irc, nick))
 
-    def _doJoin(self, irc, msg):
-        nick = msg.nick
-        prefix = msg.prefix
+    def _doJoin(self, irc, nick):
         account = self._cache.get(nick,'<None>')
 
     def doNick(self, irc, msg):
