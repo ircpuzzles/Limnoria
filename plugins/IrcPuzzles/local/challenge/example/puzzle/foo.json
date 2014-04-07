@@ -1,0 +1,9 @@
+{
+  "name": "Foo Idiom Challenge",
+  "creator": "apoc",
+  "topic": "FOO",
+  "solution": {
+    "correct": "BAR"
+  }
+}
+

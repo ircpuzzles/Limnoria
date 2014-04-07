@@ -1,0 +1,24 @@
+{
+  "name": "May Challenge",
+  "channel_prefix": "####_TEST_",
+  "begin": "2014-04-09T02:46:19+0200",
+  "end": "2014-04-12T02:46:19+0200",
+  "start_puzzle": {
+    "channel": "LOBBY",
+    "puzzle": "rot13"
+  },
+  "puzzle": {
+    "rot13": {
+      "correct": "base64",
+      "other": ["foo"]
+    },
+    "base64": {
+      "correct": "md5"
+    }
+  },
+  "end_puzzle": {
+    "puzzle": "md5",
+    "topic": "This is the end, well done!"
+  }
+}
+
