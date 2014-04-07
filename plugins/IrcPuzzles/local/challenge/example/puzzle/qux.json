@@ -1,0 +1,9 @@
+{
+  "name": "Qux Test Challenge",
+  "creator": "apoctest",
+  "clue": "qux",
+  "solution": {
+    "correct": "quux"
+  }
+}
+

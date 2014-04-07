@@ -1,7 +1,7 @@
 {
   "name": "Base64 Encoded",
   "creator": "apoc",
-  "topic": "QjY0U09MVVRJT04=",
+  "clue": "QjY0U09MVVRJT04=",
   "hints": ["encoding", "base"],
   "solution": {
     "correct": "B64SOLUTION"

@@ -1,24 +1,35 @@
 {
   "name": "May Challenge",
-  "channel_prefix": "####_TEST_",
   "begin": "2014-04-09T02:46:19+0200",
   "end": "2014-04-12T02:46:19+0200",
-  "start_puzzle": {
+  "channel_prefix": "####_TEST_",
+  "lobby": {
     "channel": "LOBBY",
-    "puzzle": "rot13"
+    "topic": "Choose your path: join {1} or {2} to begin."
   },
-  "puzzle": {
-    "rot13": {
-      "correct": "base64",
-      "other": ["foo"]
+  "tracks": [
+    {
+      "start": {
+        "channel": "first_path"
+      },
+      "puzzles": [
+        "rot13", "base64", "foo"
+      ],
+      "finish": {
+        "topic": "This is the end, well done!"
+      }
     },
-    "base64": {
-      "correct": "md5"
+    {
+      "start": {
+        "channel": "second_path"
+      },
+      "puzzles": [
+        "md5", "baz", "qux"
+      ],
+      "finish": {
+        "topic": "This is the end, well done!"
+      }
     }
-  },
-  "end_puzzle": {
-    "puzzle": "md5",
-    "topic": "This is the end, well done!"
-  }
+  ]
 }
 

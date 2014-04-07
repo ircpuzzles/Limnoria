@@ -1,7 +1,7 @@
 {
   "name": "Foo Idiom Challenge",
   "creator": "apoc",
-  "topic": "FOO",
+  "clue": "FOO",
   "solution": {
     "correct": "BAR"
   }

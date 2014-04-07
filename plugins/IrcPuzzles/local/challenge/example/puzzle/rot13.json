@@ -1,11 +1,10 @@
 {
   "name": "Rot13 Easy",
   "creator": "apoc",
-  "topic": "ebgfbyhgvba",
+  "clue": "ebgfbyhgvba",
   "solution": {
     "correct": "rotsolution",
-    "other": ["othersolution"],
-    "incorrect": ["thatsnotit"]
+    "incorrect": ["thatsnotit", "thatsnotit"]
   }
 }
 
