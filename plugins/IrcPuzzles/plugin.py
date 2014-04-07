@@ -67,6 +67,7 @@ class IrcPuzzles(callbacks.Plugin):
         for (channel, c) in irc.state.channels.iteritems():
                 if nick in c.users:
                     inchan = True
+        
         if not inchan:
             irc.reply("\"%s\" is not in any of my channels." % nick)
             return
@@ -99,6 +100,10 @@ class IrcPuzzles(callbacks.Plugin):
         for (channel, c) in irc.state.channels.iteritems():
                 if msg.nick in c.users:
                     return
+        if msg.nick in self._cache:
+            del self._cache[msg.nick]
+
+    def doQuit(self, irc, msg):
         if msg.nick in self._cache:
             del self._cache[msg.nick]
 
