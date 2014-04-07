@@ -54,7 +54,7 @@ class IrcPuzzles(callbacks.Plugin):
 
     def processAccount(self, irc, msg, nick, callback):
         if nick in self._cache:
-            callback[0](callback[1:])
+            callback[0](*callback[1:])
         else:
             self._requests[(irc.network, nick)] = callback
             irc.queueMsg(ircmsgs.whois(nick, nick))
