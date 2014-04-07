@@ -93,6 +93,7 @@ class IrcPuzzles(callbacks.Plugin):
     getcache = wrap(getcache, [])
 
     def doJoin(self, irc, msg):
+        print(repr(msg))
         nick = msg.nick
         self.processAccount(irc, nick,(self._doJoin, irc, msg))
 
