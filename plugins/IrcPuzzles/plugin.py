@@ -29,6 +29,7 @@
 ###
 
 import time
+import sqlalchemy
 
 import supybot.utils as utils
 from supybot.commands import *
@@ -36,6 +37,8 @@ import supybot.plugins as plugins
 import supybot.ircutils as ircutils
 import supybot.callbacks as callbacks
 import supybot.ircmsgs as ircmsgs
+
+from .database import *
 try:
     from supybot.i18n import PluginInternationalization
     _ = PluginInternationalization('IrcPuzzles')
@@ -46,7 +49,7 @@ except ImportError:
 
 class IrcPuzzles(callbacks.Plugin):
     """A plugin to facilitate IRC Puzzles channel management and stats tracking"""
-    threaded = False
+    threaded = True
     def __init__(self, irc):
         super(IrcPuzzles, self).__init__(irc)
         self._requests = {}
@@ -82,7 +85,10 @@ class IrcPuzzles(callbacks.Plugin):
         self.processAccount(irc, nick, (self._whataccount, irc, msg, args, nick))
 
     def _whataccount(self, irc, msg, args, nick):
-        irc.reply("\"%s\" is identified as \"%s\"." % (nick, self._cache[nick]))
+        if nick in self._cache:
+            irc.reply("\"%s\" is identified as \"%s\"." % (nick, self._cache[nick]))
+        else:
+            irc.reply("\"%s\" is not identified." % nick)
 
     whataccount = wrap(whataccount, ['text'])
 
@@ -91,6 +97,36 @@ class IrcPuzzles(callbacks.Plugin):
         irc.reply(str(self._cache))
 
     getcache = wrap(getcache, [])
+
+    def confirm(self, irc, msg, args, code):
+        self.processAccount(irc, msg.nick, (self._confirm, irc, msg, args, code))
+
+    def _confirm(self, irc, msg, args, code):
+        if msg.nick not in self._cache:
+            irc.reply("You are not identified to NickServ. Please identify and try again.")
+            return
+        account = self._cache[msg.nick]
+        code_found = False
+        users = session.query(User).filter(User.account == account)
+        if len(users) < 1:
+            irc.reply("No user was found with your NickServ account. Please try registering again.")
+            return
+
+        for user in users:
+            if user.confirmed == True:
+                irc.reply("You are already confirmed!")
+                return
+            if user.confirmation_code == code:
+                user.confirmed = True
+                session.query(User).filter(User.account == account).filter(User.id != user.id).delete()
+                session.commit()
+                irc.reply("Thank you, your account is now confirmed!")
+                return
+
+        irc.reply("Incorrect confirmation code.")
+
+
+    confirm = wrap(confirm, ['text'])
 
     def doJoin(self, irc, msg):
         nick = msg.nick
@@ -128,6 +164,14 @@ class IrcPuzzles(callbacks.Plugin):
         except KeyError:
             return
         self._cache[theirnick] = theiraccount
+        callback[0](*callback[1:])
+
+    def do318(self, irc, msg):
+        mynick, theirnick, garbage = msg.args
+        try:
+            callback = self._requests.pop((irc.network, theirnick))
+        except KeyError:
+            return
         callback[0](*callback[1:])
 
     def do352(self, irc, msg):
