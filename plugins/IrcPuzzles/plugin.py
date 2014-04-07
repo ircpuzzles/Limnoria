@@ -60,6 +60,7 @@ class IrcPuzzles(callbacks.Plugin):
             irc.queueMsg(ircmsgs.whois(nick, nick))
 
     def whatAccount(self, irc, msg, args, nick):
+        """Get the account name for a nick."""
         self.processAccount(nick, (self._whatAccount, irc, msg, args, nick))
 
     def _whatAccount(self, irc, msg, args, nick):
@@ -69,7 +70,7 @@ class IrcPuzzles(callbacks.Plugin):
             irc.reply("\"%s\" is identified as \"%s\"." % (nick, self._cache[nick]))
 
     whatAccount = wrap(whatAccount, ['text'])
-    
+
     def doJoin(self, irc, msg):
         nick = msg.nick
         self.processAccount(nick,(self._doJoin, irc, msg))
