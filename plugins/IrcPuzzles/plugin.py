@@ -52,7 +52,7 @@ class IrcPuzzles(callbacks.Plugin):
         self._requests = {}
         self._cache = {}
 
-    def processAccount(self, irc, msg, nick, callback):
+    def processAccount(self, irc, msg, nick, callback=(lambda x:None, None)):
         if nick in self._cache:
             callback[0](*callback[1:])
         else:
@@ -79,12 +79,29 @@ class IrcPuzzles(callbacks.Plugin):
         prefix = msg.prefix
         account = self._cache.get(nick,'<None>')
         for channel in msg.args[0].split(','):
-            irc.queueMsg(ircmsgs.privmsg(channel,"I saw %s join with nickserv account %s" % (prefix, account)))
+            irc.queueMsg(ircmsgs.privmsg(channel,"I saw \"%s\" join with nickserv account \"%s\"" % (prefix, account)))
+
+    def doNick(self, irc, msg):
+        self.processAccount(irc, msg, msg.args[0], (self._doNick, irc, msg))
+
+    def _doNick(self, irc, msg):
+        oldnick = msg.nick
+        newnick = msg.args[0]
+        if oldnick in self._cache:
+            del self._cache[oldnick]
+            for (channel, c) in irc.state.channels.iteritems():
+                if newnick in c.users:
+                    irc.queueMsg(ircmsgs.privmsg(channel,"I saw \"%s\" change nicks to \"%s\"" % (oldnick, newnick)))
+
+    def doPart(self, irc, msg):
+        for (channel, c) in irc.state.channels.iteritems():
+                if msg.nick in c.users:
+                    return
+        if msg.nick in self._cache:
+            del self._cache[oldnick]
 
     def do330(self, irc, msg):
         mynick, theirnick, theiraccount, garbage = msg.args
-        # I would like to use a dict comprehension, but we have to support
-        # Python 2.6 :(
         try:
             callback = self._requests.pop((irc.network, theirnick))
         except KeyError:
