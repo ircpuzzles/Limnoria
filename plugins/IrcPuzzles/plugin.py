@@ -133,6 +133,9 @@ class IrcPuzzles(callbacks.Plugin):
         self._cache[theirnick] = theiraccount
         callback[0](*callback[1:])
 
+    def do352(self, irc, msg):
+        print(repr(msg))
+
 
 Class = IrcPuzzles
 
