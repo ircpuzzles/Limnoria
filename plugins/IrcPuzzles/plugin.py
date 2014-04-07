@@ -54,6 +54,7 @@ class IrcPuzzles(callbacks.Plugin):
         self.processChannels(irc)
 
     def processChannels(self, irc):
+        print(irc.state.channels.iteritems())
         for (channel, c) in irc.state.channels.iteritems():
             for u in c.users:
                 if u not in self._cache and u != 'ircpuzzlesbot':
@@ -95,6 +96,7 @@ class IrcPuzzles(callbacks.Plugin):
     def doJoin(self, irc, msg):
         nick = msg.nick
         if nick == 'ircpuzzlesbot':
+            print("processing channels")
             self.processChannels(irc)
             return
         self.processAccount(irc, nick,(self._doJoin, irc, nick))
