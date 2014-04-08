@@ -55,35 +55,50 @@ class Game(object):
 
 class Track(object):
     def __init__(self, game, parsed_track):
+        self.name = parsed_track.get('name')
+        self.topic_format = parsed_track.get('topic_format')
 
-        self.channel = []
-        self.puzzles = []
+        puzzles = []
         for puzzle_id in parsed_track['puzzles']:
             if puzzle_id in game.puzzles:
-                self.puzzles.append(game.puzzles[puzzle_id])
+                puzzles.append(game.puzzles[puzzle_id])
             else:
                 logger.warn('puzzle for track not found: %s', puzzle_id)
 
         self.channel = []
-        for i in xrange(0, len(self.puzzles)):
+        for i in xrange(0, len(puzzles)+1):
             # the channel name is the correct solution 
             # of the previous level:
             if i == 0: # start channel (without a solution to put in the name)
                 name = game.prefix_channel(parsed_track['start']['channel'])
             else:
-                name = self.puzzles[i-1].get_correct_channel_name()
+                name = puzzles[i-1].get_correct_channel_name()
 
-            topic = self.puzzles[i].get_topic()
+            if i < len(puzzles):
+                topic = puzzles[i].get_topic()
+            else:
+                topic = parsed_track['finish']['topic']
 
-            self.channel.append(Channel(name, topic))
+            puzzle_channel = Channel(name, topic)
 
-        # append the finish channel:
-        self.channel.append(Channel(self.puzzles[-1].get_correct_channel_name(),
-                parsed_track['finish']['topic']))
+            # set cross references to puzzle instances:
+            puzzle_channel.name_puzzle = puzzles[i-1] if i > 0 else None
+            puzzle_channel.topic_puzzle = puzzles[i] if i < len(puzzles) else None
+
+            # set incorrect channel list:
+            if i < len(puzzles):
+                puzzle_channel.incorrect_next = puzzles[i].get_incorrect_channel()
+
+            self.channel.append(puzzle_channel)
+
+        # double link the channel internally:
+        for i in xrange(0, len(self.channel)):
+            self.channel[i].prev = self.channel[i-1] if i > 0 else None
+            self.channel[i].next = self.channel[i+1] if i < len(self.channel)-1 else None
 
         # generate channel for incorrect solutions:
         self.incorrect_channel = []
-        for puzzle in self.puzzles:
+        for puzzle in puzzles:
             self.incorrect_channel += puzzle.get_incorrect_channel()
 
     def get_start(self):

@@ -38,7 +38,10 @@ class Puzzle(object):
         return self.game.prefix_channel(self.correct_solution)
 
     def get_incorrect_channel(self):
-        return [
-            Channel(self.game.prefix_channel(name), self.incorrect_topic)\
-                    for name in self.incorrect_solutions ]
+        incorrect_channel = []
+        for name in self.incorrect_solutions:
+            channel = Channel(self.game.prefix_channel(name), self.incorrect_topic)
+            channel.name_puzzle = self
+            incorrect_channel.append(channel)
+        return incorrect_channel
 
