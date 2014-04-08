@@ -5,10 +5,12 @@
   "channel_prefix": "####_TEST_",
   "lobby": {
     "channel": "LOBBY",
-    "topic": "Choose your path: join {1} or {2} to begin."
+    "topic": "Welcome to %(name)s! | Choose your path: join %(track1_start)s (%(track1_name)s) or %(track1_start)s (%(track1_name)s) to start!"
   },
   "tracks": [
     {
+      "name": "First Track",
+      "topic_format": "First | Clue: %(clue)s | Hint: %(hint)s",
       "start": {
         "channel": "first_path"
       },
@@ -20,6 +22,8 @@
       }
     },
     {
+      "name": "Second Track",
+      "topic_format": "..",
       "start": {
         "channel": "second_path"
       },
