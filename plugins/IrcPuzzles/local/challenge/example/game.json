@@ -23,7 +23,7 @@
     },
     {
       "name": "Second Track",
-      "topic_format": "..",
+      "topic_format": "%(game_name)s: Track%(track_num)s: %(track_name)s | [level%(puzzle_num)s/%(puzzle_max)s] Clue: %(clue)s | Hint: %(hint)s",
       "start": {
         "channel": "second_path"
       },

@@ -107,7 +107,7 @@ class Track(object):
             if not puzzle: # finish channel (without current puzzle)
                 topic = content['finish']['topic']
             else:
-                topic = track.format_puzzle_topic(puzzles[i], game, i+1)
+                topic = track.format_puzzle_topic(puzzles[i], game, i+1, len(puzzles))
 
             channel = Channel(name, topic)
 
@@ -140,7 +140,7 @@ class Track(object):
     def get_finish(self):
         return self.channel[-1]
 
-    def format_puzzle_topic(self, puzzle, game, puzzle_num):
+    def format_puzzle_topic(self, puzzle, game, puzzle_num, puzzle_max):
         """Format the topic, the following format keys are placed:
 
             %(clue)s - the clue of the puzzle
@@ -157,7 +157,7 @@ class Track(object):
             'track_name': self.name,
             'track_num': self.index+1,
             'puzzle_num': puzzle_num,
-            'puzzle_max': len(self.channel)-1,
+            'puzzle_max': puzzle_max,
             'game_name': game.name
         }
 
@@ -172,28 +172,23 @@ if __name__ == '__main__':
 
     game = Game('example/game.json')
 
-    # to access tracks:
-    print len(game.tracks) #> 2
+    print 'Game Name: ' + game.name
+    print 'Lobby Channel: ' + game.lobby.name
+    print 'Lobby Topic: ' + game.lobby.topic
+    print
     first_track = game.tracks[0]
-    print len(first_track.channel) #> list of all (correct) channels in this track
+    print 'Track 1: ' + first_track.name
+    print 'Track Channel:            Puzzle:                Topic:'
+    print '---------------------------------------------------------------------------------'
+    for channel in first_track.channel:
+        print '%-25s %-22s %s' % (channel.name, channel.puzzle.name if channel.puzzle else 'no-puzzle', channel.topic)
 
-    print game.lobby
+    print
+    second_track = game.tracks[1]
+    print 'Track 2: ' + second_track.name
+    print 'Track Channel:            Puzzle:                Topic:'
+    print '---------------------------------------------------------------------------------'
+    for channel in second_track.channel:
+        print '%-25s %-22s %s' % (channel.name, channel.puzzle.name if channel.puzzle else 'no-puzzle', channel.topic)
 
-    # get tracks:
-    for chan in game.tracks[0].channel:
-        print '%s || %s' % (chan.name, chan.topic)
-    print
-    for chan in game.tracks[0].channel_incorrect:
-        print '%s || %s' % (chan.name, chan.topic)
-    print
-    for chan in game.tracks[1].channel:
-        print '%s || %s' % (chan.name, chan.topic)
-    print
-    for chan in game.tracks[1].channel_incorrect:
-        print '%s || %s' % (chan.name, chan.topic)
-
-    # get lobby channel
-    #lobby = game.getLobby()
-    #print lobby.name # => "####_TEST_LOBBY"
-    #print lobby.topic # => "Choose your path: join #first_path or #second_path to begin."
 
