@@ -1,7 +1,7 @@
 {
-  "name": "May Challenge",
-  "begin": "2014-04-09T02:46:19+0200",
-  "end": "2014-04-12T02:46:19+0200",
+  "name": "Test Game Name",
+  "begin": "2014-04-10T06:00:00+0200",
+  "end": "2014-04-20T12:00:00+0200",
   "channel_prefix": "####_TEST_",
   "lobby": {
     "channel": "LOBBY",

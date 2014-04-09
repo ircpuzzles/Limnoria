@@ -121,7 +121,7 @@ class Track(object):
                         incorrect,
                         puzzle.incorrect_topic
                     )
-                    puzzle.next_incorrect.append(incorrect_channel)
+                    channel.next_incorrect.append(incorrect_channel)
                     # also generate a per-track list of incorrect channel:
                     track.channel_incorrect.append(incorrect_channel)
 

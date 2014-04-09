@@ -17,11 +17,6 @@ class Puzzle(object):
         self.incorrect_topic = None
         self.solution = None
 
-        self.prev = None
-        self.next = None
-        self.next_incorrect = []
-        self.puzzle = None
-
     def get_correct(self):
         return self.solution.get('correct')
 
@@ -33,7 +28,9 @@ class Puzzle(object):
         """Load specified puzzle json definition.
 
         Args:
-            filename (str): path to puzzle json file.
+            path (str): path to puzzle json file.
+        Return:
+            Puzzle instance
         """
         id, ext = splitext(basename(path))
 
@@ -48,18 +45,4 @@ class Puzzle(object):
             puzzle.incorrect_topic = content.get('incorrect_topic', '')
             puzzle.solution = content.get('solution')
             return puzzle
-
-    #def get_topic(self):
-    #    return self.clue
-
-    #def get_correct_channel_name(self):
-    #    return self.game.format_channel(self.correct_solution)
-
-    #def get_incorrect_channel(self):
-    #    incorrect_channel = []
-    #    for name in self.incorrect_solutions:
-    #        channel = Channel(self.game.format_channel(name), self.incorrect_topic)
-    #        channel.name_puzzle = self
-    #        incorrect_channel.append(channel)
-    #    return incorrect_channel
 
