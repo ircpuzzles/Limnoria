@@ -143,14 +143,14 @@ class IrcPuzzles(callbacks.Plugin):
 
     confirm = wrap(confirm, ['text'])
 
-    def game_stop(self, irc, msg, args, path):
+    def gameStop(self, irc, msg, args, path):
         """Stopps the currently running game."""
         if self._game:
             pass # TODO: -apoc
         else:
             irc.reply('No game currently running.')
 
-    game_stop = wrap(game_stop, [('admin'), optional('filename')], 'game stop')
+    gameStop = wrap(gameStop, [('admin'), optional('filename')], 'game stop')
 
     def game(self, irc, msg, args, path):
         """[<path>]
