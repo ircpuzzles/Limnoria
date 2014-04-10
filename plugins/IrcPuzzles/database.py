@@ -19,6 +19,16 @@ class User(Base):
     def __repr__(self):
         return "<User(account='%s', confirmed='%s')>" % (self.account, str(self.confirmed))
 
+class GameInfo(Base):
+    __tablename__ = 'game_infos'
 
+    id = Column(Integer, primary_key=True)
+
+    # absolute path to the game.json
+    path = Column(String(512))
+    running = Column(Boolean)
+
+    def __repr__(self):
+        return "<GameInfo(%d, path='%s', running='%s')>" % (self.id, self.path, str(self.running))
 
 Base.metadata.create_all(engine)

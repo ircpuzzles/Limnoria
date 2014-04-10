@@ -39,6 +39,7 @@ import supybot.callbacks as callbacks
 import supybot.ircmsgs as ircmsgs
 
 from .database import *
+from .local.challenge import Game
 try:
     from supybot.i18n import PluginInternationalization
     _ = PluginInternationalization('IrcPuzzles')
@@ -46,6 +47,9 @@ except ImportError:
     # Placeholder that allows to run the plugin on a bot
     # without the i18n module
     _ = lambda x:x
+
+import logging
+logger = logging.getLogger('ircpuzzles')
 
 class IrcPuzzles(callbacks.Plugin):
     """A plugin to facilitate IRC Puzzles channel management and stats tracking"""
@@ -55,13 +59,22 @@ class IrcPuzzles(callbacks.Plugin):
         self._requests = {}
         self._cache = {}
         self.processChannels(irc)
+        self._game = self.initGame()
+
+    def initGame(self):
+        """Return the Game instance of the running GameInfo record."""
+        res = session.query(GameInfo).filter(GameInfo.running == True)
+        if res.count() == 1:
+            try:
+                return Game(res.one().path)
+            except Exception, e:
+                logger.error('unable to intialize game, path='+res.one().path)
 
     def processChannels(self, irc):
         for (channel, c) in irc.state.channels.iteritems():
             for u in c.users:
                 if u not in self._cache and u != 'ircpuzzlesbot':
                     self.processAccount(irc, u)
-
 
     def processAccount(self, irc, nick, callback=(lambda x:None, None)):
         if nick in self._cache:
@@ -78,7 +91,7 @@ class IrcPuzzles(callbacks.Plugin):
         for (channel, c) in irc.state.channels.iteritems():
                 if nick in c.users:
                     inchan = True
-        
+
         if not inchan:
             irc.reply("\"%s\" is not in any of my channels." % nick)
             return
@@ -96,7 +109,7 @@ class IrcPuzzles(callbacks.Plugin):
         """Return the raw cache for debugging"""
         irc.reply(str(self._cache))
 
-    getcache = wrap(getcache, [])
+    getcache = wrap(getcache, ['admin'])
 
     def confirm(self, irc, msg, args, code):
         """<code>
@@ -128,8 +141,44 @@ class IrcPuzzles(callbacks.Plugin):
 
         irc.reply("Incorrect confirmation code.")
 
-
     confirm = wrap(confirm, ['text'])
+
+    def game_stop(self, irc, msg, args, path):
+        """Stopps the currently running game."""
+        if self._game:
+            pass # TODO: -apoc
+        else:
+            irc.reply('No game currently running.')
+
+    game_stop = wrap(game_stop, [('admin'), optional('filename')], 'game stop')
+
+    def game(self, irc, msg, args, path):
+        """[<path>]
+
+        Returns currently running game, or initialize a new one,
+        <path> should be a path to a game.json file."""
+        if self._game:
+            irc.reply('Currently running game: '+self._game.name)
+        else:
+            if not path:
+                irc.reply('No game is running, specify <path> to initialize')
+                return
+            irc.reply('Initalize game path: '+path)
+
+            self._game = game = Game(path)
+            irc.reply('Starting game: '+game.name)
+            pass # TODO:join channel -apoc
+            res = session.query(GameInfo).filter(GameInfo.path == path)
+            if res.count() > 0:
+                res.one().running = True
+            else:
+                game_info = GameInfo()
+                game_info.path = path
+                game_info.running = True
+                session.add(game_info)
+            session.commit()
+
+    game = wrap(game, [('admin'), optional('filename')])
 
     def doJoin(self, irc, msg):
         nick = msg.nick

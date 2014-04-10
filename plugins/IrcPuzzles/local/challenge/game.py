@@ -105,7 +105,7 @@ class Track(object):
 
             # channel topic: current puzzle clue
             if not puzzle: # finish channel (without current puzzle)
-                topic = content['finish']['topic']
+                topic = track.format_finish_topic(content['finish']['topic'], game, i+1, len(puzzles))
             else:
                 topic = track.format_puzzle_topic(puzzles[i], game, i+1, len(puzzles))
 
@@ -148,6 +148,7 @@ class Track(object):
             %(track_name)s - name of the track
             %(track_num)s - number of the track (starting with 1)
             %(puzzle_num)s - number of the puzzle in current track
+            %(puzzle_prev)s - number of the previous puzzle in current track
             %(puzzle_max)s - puzzle count in this track
             %(game_name)s - puzzle count in this track
         """
@@ -157,6 +158,26 @@ class Track(object):
             'track_name': self.name,
             'track_num': self.index+1,
             'puzzle_num': puzzle_num,
+            'puzzle_prev': puzzle_num - 1,
+            'puzzle_max': puzzle_max,
+            'game_name': game.name
+        }
+
+    def format_finish_topic(self, topic, game, puzzle_num, puzzle_max):
+        """Format the topic, the following format keys are placed:
+
+            %(track_name)s - name of the track
+            %(track_num)s - number of the track (starting with 1)
+            %(puzzle_num)s - number of the puzzle in current track
+            %(puzzle_prev)s - number of the previous puzzle in current track
+            %(puzzle_max)s - puzzle count in this track
+            %(game_name)s - puzzle count in this track
+        """
+        return topic % {
+            'track_name': self.name,
+            'track_num': self.index+1,
+            'puzzle_num': puzzle_num,
+            'puzzle_prev': puzzle_num - 1,
             'puzzle_max': puzzle_max,
             'game_name': game.name
         }
