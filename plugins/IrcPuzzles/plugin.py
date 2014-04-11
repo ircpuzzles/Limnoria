@@ -58,10 +58,10 @@ class IrcPuzzles(callbacks.Plugin):
         super(IrcPuzzles, self).__init__(irc)
         self._requests = {}
         self._cache = {}
-        self.processChannels(irc)
-        self._game = self.initGame()
+        logger.info('plugin initialized!')
+        # NOTE: the bot is not connected to IRC yet.
 
-    def initGame(self):
+    def getRunningGame(self):
         """Return the Game instance of the running GameInfo record."""
         res = session.query(GameInfo).filter(GameInfo.running == True)
         if res.count() == 1:
@@ -70,18 +70,86 @@ class IrcPuzzles(callbacks.Plugin):
             except Exception, e:
                 logger.error('unable to intialize game, path='+res.one().path)
 
+    def do001(self, irc, msg):
+        """Welcome to IRC, just after connecting to the irc server."""
+        # requests the capabilities we use to track nickserv usernames
+        self.sendCapReq(irc)
+        # init running game object, will let the bot join in 
+        # the channel of the currently running game (TODO).
+        self._game = self.getRunningGame()
+
+        # this should be called _after_ the bot has joined in all 
+        # puzzle channel: (TODO: move after join is implemented)
+        self.processChannels(irc)
+
+    def sendCapReq(self, irc):
+        """Issue a CAP REQ command to request account-notify and extended-join."""
+        logger.info('queue cap req for account-notify and extended-join')
+        irc.queueMsg(ircmsgs.IrcMsg(command="CAP", args=('REQ', 'account-notify extended-join')))
+
+    def inFilter(self, irc, msg):
+        if msg.command == 'CAP':
+            self.doCAP(irc, msg)
+        elif msg.command == 'ACCOUNT':
+            self.doACCOUNT(irc, msg)
+        return msg
+
+    def doCAP(self, irc, msg):
+        """CAP is received in response to our cap request:
+
+        account-notify -- notifies us if a user in a channel the bot is in,
+        identifies with nickserv, it tells us its username.
+
+        extended-join -- tells us the users nickserv username when he joins
+        a channel the bot is in.
+        """
+        nick, command, caps = msg.args
+        if nick == irc.nick and command == 'ACK':
+            caps = caps.split(' ')
+            if 'account-notify' in caps and 'extended-join' in caps:
+                logger.info('success! aquired caps: '+','.join(caps))
+            else:
+                logger.error('unable to aquire caps!')
+
+    def doACCOUNT(self, irc, msg):
+        """Notifications of user login/logout in NickServ.
+
+        The account-notify cap allows us to see when a user of a channel we are
+        in is logging into or logging off of NickServ.
+        """
+        logger.info('account-notify received: ' + str(msg.args))
+        account = msg.args[0]
+        if account != '*':
+            logger.info('account-notify: add account cache for %s: %s' % (msg.nick, account))
+            self._cache[msg.nick] = account
+        elif msg.nick in self._cache:
+            logger.debug('account-notify: remove existing account cache: '+msg.nick)
+            del self._cache[msg.nick]
+
     def processChannels(self, irc):
+        """Receive NickServ username for every user whos in a channel the bot is in."""
+        logger.info('process %d channels, whois users for nickserv username' %
+                len(irc.state.channels))
         for (channel, c) in irc.state.channels.iteritems():
             for u in c.users:
-                if u not in self._cache and u != 'ircpuzzlesbot':
+                if u not in self._cache and u != irc.nick:
                     self.processAccount(irc, u)
 
     def processAccount(self, irc, nick, callback=(lambda x:None, None)):
+        """Queue a /whois for the specified user (nick).
+
+        No whois is performed if nick is present in _cache.
+        Callback is called after the username was acquired."""
         if nick in self._cache:
             callback[0](*callback[1:])
         else:
             self._requests[(irc.network, nick)] = callback
             irc.queueMsg(ircmsgs.whois(nick, nick))
+
+    def debugProcessChannels(self, irc, msg, args):
+        """Does a manual process channels."""
+        self.processChannels(irc)
+    debugProcessChannels = wrap(debugProcessChannels, [])
 
     def whataccount(self, irc, msg, args, nick):
         """<nick>
@@ -167,6 +235,7 @@ class IrcPuzzles(callbacks.Plugin):
 
             self._game = game = Game(path)
             irc.reply('Starting game: '+game.name)
+            #self.joinGameChannels()
             pass # TODO:join channel -apoc
             res = session.query(GameInfo).filter(GameInfo.path == path)
             if res.count() > 0:
@@ -181,10 +250,13 @@ class IrcPuzzles(callbacks.Plugin):
     game = wrap(game, [('admin'), optional('filename')])
 
     def doJoin(self, irc, msg):
-        nick = msg.nick
-        if nick == 'ircpuzzlesbot':
-            return
-        self.processAccount(irc, nick,(self._doJoin, irc, nick))
+        channel, account, realname = msg.args
+        if account != '*':
+            logger.debug('extended-join: add account cache for %s: %s' % (msg.nick, account))
+            self._cache[msg.nick] = account
+        elif msg.nick in self._cache:
+            logger.debug('extended-join: remove existing account cache: '+msg.nick)
+            del self._cache[msg.nick]
 
     def _doJoin(self, irc, nick):
         account = self._cache.get(nick,'<None>')

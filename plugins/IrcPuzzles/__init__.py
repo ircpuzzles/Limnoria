@@ -33,6 +33,17 @@ Add a description of the plugin (to be presented to the user inside the wizard)
 here.  This should describe *what* the plugin does.
 """
 
+import logging
+logger = logging.getLogger('ircpuzzles')
+sh = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+sh.setFormatter(formatter)
+# NOTE: might also add a logfile handler here.
+logger.addHandler(sh)
+
+# change loglevel here:
+logger.setLevel(logging.DEBUG)
+
 import supybot
 import supybot.world as world
 

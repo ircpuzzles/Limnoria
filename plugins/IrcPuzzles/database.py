@@ -20,6 +20,9 @@ class User(Base):
         return "<User(account='%s', confirmed='%s')>" % (self.account, str(self.confirmed))
 
 class GameInfo(Base):
+    """Information about running game, used by the bot and webapp 
+    to create the Game() instances.
+    """
     __tablename__ = 'game_infos'
 
     id = Column(Integer, primary_key=True)
