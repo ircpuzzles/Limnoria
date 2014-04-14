@@ -58,6 +58,7 @@ class IrcPuzzles(callbacks.Plugin):
         super(IrcPuzzles, self).__init__(irc)
         self._requests = {}
         self._cache = {}
+        self._game = None
         logger.info('plugin initialized!')
         # NOTE: the bot is not connected to IRC yet.
 
@@ -71,16 +72,34 @@ class IrcPuzzles(callbacks.Plugin):
                 logger.error('unable to intialize game, path='+res.one().path)
 
     def joinGameChannels(self, irc):
-        logger.info('join game channels')
-        # TODO: ...
+        if not self._game:
+            logger.info('no game currently running')
+            return
+        logger.info('join running game channels...')
+        channels = [self._game.lobby.name]
+        self.joinChannel(irc, self._game.lobby.name)
+        for track in self._game.tracks:
+            for channel in track.channels:
+                self.joinChannel(irc, channel.name)
+                channels.append(channel.name)
+        logger.info('joined ' + ', '.join(channels))
+        return channels
+
+    def joinChannel(self, irc, channel):
+        if not self.botInChannel(irc, channel):
+            logger.info('join channel '+channel)
+            irc.queueMsg(ircmsgs.join(channel))
+        else:
+            logger.info('bot already joined in '+channel)
 
     def do001(self, irc, msg):
         """Welcome to IRC, just after connecting to the irc server."""
+        # init running game object, will let the bot join in 
+        # the channel of the currently running game
+        self._game = self.getRunningGame()
         # requests the capabilities we use to track nickserv usernames
         self.sendCapRequest(irc)
-        # init running game object, will let the bot join in 
-        # the channel of the currently running game (TODO).
-        self._game = self.getRunningGame()
+        # we join the game channels after the caps are confirmed by the server
 
     def sendCapRequest(self, irc):
         """Issue a CAP REQ command to request account-notify and extended-join."""
@@ -101,7 +120,7 @@ class IrcPuzzles(callbacks.Plugin):
             caps = caps.split(' ')
             if 'account-notify' in caps and 'extended-join' in caps:
                 logger.info('success! aquired caps: '+','.join(caps))
-                self.joinGameChannel(irc)
+                self.joinGameChannels(irc)
             else:
                 logger.error('fatal! unable to aquire caps! (network unsupported)')
 
@@ -178,7 +197,8 @@ class IrcPuzzles(callbacks.Plugin):
 
             self._game = game = Game(path)
             irc.reply('Starting game: '+game.name)
-            self.joinGameChannels(irc)
+            channels = self.joinGameChannels(irc)
+            irc.reply('Joined game channels: ' + ', '.join(channels))
             res = session.query(GameInfo).filter(GameInfo.path == path)
             if res.count() > 0:
                 res.one().running = True
@@ -197,6 +217,12 @@ class IrcPuzzles(callbacks.Plugin):
         You may specify a channel that is excluded."""
         for (channel, c) in irc.state.channels.iteritems():
             if nick in c.users and channel != excludeChannel:
+                return True
+        return False
+
+    def botInChannel(self, irc, channel):
+        for (_channel, c) in irc.state.channels.iteritems():
+            if channel == _channel:
                 return True
         return False
 

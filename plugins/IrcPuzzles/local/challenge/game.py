@@ -75,6 +75,14 @@ class Game(object):
 
         return topic_format % keys
 
+    def get_channel(self, channel_name):
+        if self.lobby.name == channel_name:
+            return self.lobby
+        for track in self.tracks:
+            for channel in track.channels:
+                if channel.name == channel_name:
+                    return channel
+
 class Track(object):
     def __init__(self):
         self.index = 0
@@ -82,8 +90,8 @@ class Track(object):
         # the topic format is applied to all channel topics, except the finish channel
         self.topic_format = None
         # Channel for this track, in order
-        self.channel = []
-        self.channel_incorrect = []
+        self.channels = []
+        self.channels_incorrect = []
 
     @staticmethod
     def parse(game, content, index):
@@ -123,22 +131,22 @@ class Track(object):
                     )
                     channel.next_incorrect.append(incorrect_channel)
                     # also generate a per-track list of incorrect channel:
-                    track.channel_incorrect.append(incorrect_channel)
+                    track.channels_incorrect.append(incorrect_channel)
 
-            track.channel.append(channel)
+            track.channels.append(channel)
 
         # build internal links between channel:
-        for i in xrange(0, len(track.channel)):
-            track.channel[i].prev = track.channel[i-1] if i > 0 else None
-            track.channel[i].next = track.channel[i+1] if i < len(track.channel)-1 else None
+        for i in xrange(0, len(track.channels)):
+            track.channels[i].prev = track.channels[i-1] if i > 0 else None
+            track.channels[i].next = track.channels[i+1] if i < len(track.channels)-1 else None
 
         return track
 
     def get_start(self):
-        return self.channel[0]
+        return self.channels[0]
 
     def get_finish(self):
-        return self.channel[-1]
+        return self.channels[-1]
 
     def format_puzzle_topic(self, puzzle, game, puzzle_num, puzzle_max):
         """Format the topic, the following format keys are placed:
@@ -201,7 +209,7 @@ if __name__ == '__main__':
     print 'Track 1: ' + first_track.name
     print 'Track Channel:            Puzzle:                Topic:'
     print '---------------------------------------------------------------------------------'
-    for channel in first_track.channel:
+    for channel in first_track.channels:
         print '%-25s %-22s %s' % (channel.name, channel.puzzle.name if channel.puzzle else 'no-puzzle', channel.topic)
 
     print
@@ -209,7 +217,7 @@ if __name__ == '__main__':
     print 'Track 2: ' + second_track.name
     print 'Track Channel:            Puzzle:                Topic:'
     print '---------------------------------------------------------------------------------'
-    for channel in second_track.channel:
+    for channel in second_track.channels:
         print '%-25s %-22s %s' % (channel.name, channel.puzzle.name if channel.puzzle else 'no-puzzle', channel.topic)
 
 
