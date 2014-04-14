@@ -1,0 +1,26 @@
+{
+  "name": "Test Game",
+  "begin": "2014-04-20T06:00:00+0200",
+  "end": "2014-04-30T12:00:00+0200",
+  "channel_prefix": "####TEST_",
+  "lobby": {
+    "channel": "LOBBY",
+    "topic": "Welcome to %(name)s! | Join %(track1_start)s to begin!"
+  },
+  "tracks": [
+    {
+      "name": "Test Track",
+      "topic_format": "Welcome to Level %(puzzle_num)s | Clue: %(clue)s",
+      "start": {
+        "channel": "START"
+      },
+      "puzzles": [
+        "rot13", "foo"
+      ],
+      "finish": {
+        "topic": "This is the end, well done!"
+      }
+    }
+  ]
+}
+
