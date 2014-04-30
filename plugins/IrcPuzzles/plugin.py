@@ -92,6 +92,15 @@ class IrcPuzzles(callbacks.Plugin):
         else:
             logger.info('bot already joined in '+channel)
 
+    def joinedGameChannel(self, irc, channel_obj):
+        """Called after a game-associated channel has been joined by the bot.
+
+        The bot should setup the channel with ChanServ,
+        set the topic, op bot admins and (TODO) log users
+        in the channel."""
+
+        irc.queueMsg(ircmsgs.topic(channel_obj.name, channel_obj.topic))
+
     def do001(self, irc, msg):
         """Welcome to IRC, just after connecting to the irc server."""
         # init running game object, will let the bot join in 
@@ -243,6 +252,10 @@ class IrcPuzzles(callbacks.Plugin):
         if msg.nick == irc.nick:
             logger.debug('bot joined channel=%s, send WHO request for account names' % (channel,))
             irc.queueMsg(ircmsgs.IrcMsg(command='WHO', args=(channel, '%na')))
+            if self._game:
+                channel_obj = self._game.get_channel(channel)
+                if channel_obj:
+                    self.joinedGameChannel(irc, channel_obj)
             return
 
         if account == '*' and msg.nick in self._cache:
