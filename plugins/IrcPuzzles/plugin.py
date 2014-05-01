@@ -200,7 +200,7 @@ class IrcPuzzles(callbacks.Plugin):
             if len(joins) < 1:
                 irc.queueMsg(remove(channel,msg.nick,'You must complete tracks in order.'))
                 return
-            join = Join(user=u,channel=channel)
+            join = Join(user=u.id,channel=channel)
             logger.debug('adding join obj for %s to %s' % (u,channel))
             session.add(join)
             session.commit()
