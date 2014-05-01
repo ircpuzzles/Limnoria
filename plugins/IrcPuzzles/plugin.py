@@ -201,7 +201,7 @@ class IrcPuzzles(callbacks.Plugin):
 
     confirm = wrap(confirm, ['text'])
 
-    def gamestop(self, irc, msg, args, path):
+    def gamestop(self, irc, msg, args):
         """Stops the currently running game."""
         if self._game:
             game = self._game
