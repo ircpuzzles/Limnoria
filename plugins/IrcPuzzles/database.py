@@ -34,4 +34,13 @@ class GameInfo(Base):
     def __repr__(self):
         return "<GameInfo(%d, path='%s', running='%s')>" % (self.id, self.path, str(self.running))
 
+class Join(Base):
+    __tablename__ = 'joins'
+
+    id = Column(Integer, primary_key=True)
+    user = Column(Integer, ForeignKey('users.id'))
+    channel = Column(String)
+    time = Column(db.DateTime, default=db.func.now())
+
+
 Base.metadata.create_all(engine)

@@ -107,14 +107,24 @@ class IrcPuzzles(callbacks.Plugin):
         logger.info('part running game channels...')
         channels = [self._game.lobby.name]
         self.partChannel(irc, self._game.lobby.name)
-        irc.queueMsg(ircmsgs.privmsg("ChanServ","DROP %s" %
-            self._game.lobby.name))
+        #irc.queueMsg(ircmsgs.privmsg("ChanServ","DROP %s" %
+        #    self._game.lobby.name))
+        # Do not drop lobby
         for track in self._game.tracks:
             for channel in track.channels:
                 self.partChannel(irc, channel.name)
                 irc.queueMsg(ircmsgs.privmsg("ChanServ","DROP %s" % channel.name))
                 channels.append(channel.name)
         logger.info('parted ' + ', '.join(channels))
+        return channels
+
+    def getChannels(self):
+        if not self._game:
+            return []
+        channels = []
+        for track in self._game.tracks:
+            for channel in track.channels:
+                channels.append(channel)
         return channels
 
     def partChannel(self, irc, channel):
@@ -141,6 +151,44 @@ class IrcPuzzles(callbacks.Plugin):
         irc.queueMsg(ircmsgs.topic(channel_obj.name, channel_obj.topic))
         self.register(irc,channel_obj.name)
 
+    def handleUserJoin(self, irc, msg):
+        channel, account, realname = msg.args
+        gameChannels = self.getChannels()    
+        if msg.nick == irc.nick:
+            return
+        if account in owners:
+            logger.debug('user %s is owner, not handling join' % msg.nick)
+            return
+        if not self._game:
+            return
+        game = self._game
+        if channel == game.lobby.name:
+            logger.debug('nick %s (account %s) joined lobby %s' % (msg.nick,account,channel))
+            if account == '*':
+                irc.reply('Welcome %s! You must be identified to compete. All game channels are set +r.') # Notify user as a friendly warning
+        elif channel in gameChannels:
+            if account == '*':
+                irc.queueMsg(ircmsgs.kick(channel,msg.nick,'You must be identified with NickServ to play ircpuzzles.')) # Should never be reached as channels are +r
+                return
+            user = list(session.query(User).filter(User.account == account).filter(User.confirmed == True)
+            if len(user) < 1:
+                irc.queueMsg(ircmsgs.kick(channel,msg.nick,'You must be registered with the bot to compete. Please register at http://ircpuzzles.org.'))
+                return
+            u = user[0]
+            channel_obj = game.get_channel(channel)
+            prev = channel_obj.prev
+            if not prev:
+                logger.debug('user %s joined channel %s (first in track)' % (u,channel))
+                return # Channel is first in track, user is good
+            joins = list(session.query(Join).filter(Join.channel == channel).filter(Join.user == u.id))
+            if len(joins) < 1:
+                irc.queueMsg(ircmsgs.kick(channel,msg.nick,'You must complete tracks in order.'))
+                return
+            join = Join(user=u,channel=channel)
+            logger.debug('adding join obj for %s to %s' % (u,channel))
+            session.add(join)
+            session.commit()
+        
     def register(self, irc, channel):
         irc.queueMsg(ircmsgs.privmsg("ChanServ","REGISTER %s" % channel))
 
@@ -319,9 +367,13 @@ class IrcPuzzles(callbacks.Plugin):
         if account == '*' and msg.nick in self._cache:
             logger.debug('account cache: remove nick=%s (extended-join)' % (msg.nick,))
             del self._cache[msg.nick]
+        elif account == '*':
+            logger.debug('account cache: user %s joined unidentified, not in cache (extended-join)' % msg.nick)
         else:
             logger.debug('account cache: set nick=%s with account=%s (extended-join)' % (msg.nick, account))
             self._cache[msg.nick] = account
+        self.handleUserJoin(irc, msg)
+
 
     def doNick(self, irc, msg):
         newnick = msg.args[0]
