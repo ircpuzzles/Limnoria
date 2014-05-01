@@ -368,7 +368,7 @@ class IrcPuzzles(callbacks.Plugin):
             self._cache[msg.nick] = account
 
     def doNotice(self, irc, msg):
-        if msg.nick == 'ChanServ':
+        if msg.nick.lower() == 'chanserv':
             registered = re.findall('^([^ ]+) is now registered to',msg.args[1].lower())
             drop = re.findall('/msg ChanServ DROP ([^ ]*) ([^ ]*)', msg.args[1].lower())
             if registered:
@@ -376,7 +376,7 @@ class IrcPuzzles(callbacks.Plugin):
                 irc.queueMsg(ircmsgs.privmsg("ChanServ","FLAGS %s %s +O" % (channel, irc.nick)))
                 for owner in owners:
                     irc.queueMsg(ircmsgs.privmsg("ChanServ","FLAGS %s %s %s" % (channel, owner, ownerflags)))
-                irc.queueMsg(ircmsgs.privmsg("ChanServ","SET MLOCK %s %s" % (channel, channelmlock)))
+                irc.queueMsg(ircmsgs.privmsg("ChanServ","SET %s MLOCK %s" % (channel, channelmlock)))
             if drop:
                 irc.queueMsg(ircmsgs.privmsg("ChanServ","DROP %s %s" % (drop[0][0],drop[0][1])))
 
