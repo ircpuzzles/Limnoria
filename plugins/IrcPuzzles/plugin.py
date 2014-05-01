@@ -60,7 +60,12 @@ class IrcPuzzles(callbacks.Plugin):
         self._cache = {}
         self._game = None
         logger.info('plugin initialized!')
+        self.processReload(irc) # If the bot is already connected, update the cache from joined channels.
         # NOTE: the bot is not connected to IRC yet.
+
+    def processReload(self, irc):
+        for (channel, c) in irc.state.channels.iteritems():
+            self.doJoin(irc, {'nick':irc.nick,'args':(channel,irc.nick,irc.nick)}) # Fake a join on reload to update cache
 
     def getRunningGame(self):
         """Return the Game instance of the running GameInfo record."""
@@ -183,7 +188,7 @@ class IrcPuzzles(callbacks.Plugin):
     confirm = wrap(confirm, ['text'])
 
     def gameStop(self, irc, msg, args, path):
-        """Stopps the currently running game."""
+        """Stops the currently running game."""
         if self._game:
             pass # TODO: -apoc
         else:
