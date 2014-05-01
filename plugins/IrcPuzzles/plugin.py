@@ -201,14 +201,26 @@ class IrcPuzzles(callbacks.Plugin):
 
     confirm = wrap(confirm, ['text'])
 
-    def gameStop(self, irc, msg, args, path):
+    def gamestop(self, irc, msg, args, path):
         """Stops the currently running game."""
         if self._game:
-            pass # TODO: -apoc
+            game = self._game
+            irc.reply('Stopping game: '+game.name)
+            channels = self.partGameChannels(irc)
+            irc.reply('Parted game channels: ' + ', '.join(channels))
+            res = session.query(GameInfo).filter(GameInfo.path == game.path)
+            if res.count() > 0:
+                res.one().running = False
+            else:
+                irc.reply('Count not find game db object to stop.')
+                return
+            session.commit()
+            irc.reply('Game stopped.')
+
         else:
             irc.reply('No game currently running.')
 
-    gameStop = wrap(gameStop, [('admin'), optional('filename')], 'game stop')
+    gamestop = wrap(gamestop, [('admin')], 'game stop')
 
     def game(self, irc, msg, args, path):
         """[<path>]
