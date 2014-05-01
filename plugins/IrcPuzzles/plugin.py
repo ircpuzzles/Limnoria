@@ -232,10 +232,11 @@ class IrcPuzzles(callbacks.Plugin):
             res = session.query(GameInfo).filter(GameInfo.path == game.path)
             if res.count() > 0:
                 res.one().running = False
+                session.commit()
             else:
-                irc.reply('Count not find game db object to stop.')
+                irc.reply('Could not find game db object to stop.')
                 return
-            session.commit()
+            self._game = None
             irc.reply('Game stopped.')
 
         else:
