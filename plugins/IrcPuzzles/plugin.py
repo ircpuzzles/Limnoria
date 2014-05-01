@@ -105,7 +105,7 @@ class IrcPuzzles(callbacks.Plugin):
             logger.info('no game currently running')
             return
         logger.info('part running game channels...')
-        channels = self._game.lobby.name]
+        channels = [self._game.lobby.name]
         self.partChannel(irc, self._game.lobby.name)
         for track in self._game.tracks:
             for channel in track.channels:
