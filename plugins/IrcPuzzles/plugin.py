@@ -155,7 +155,10 @@ class IrcPuzzles(callbacks.Plugin):
             self.register(irc,channel_obj.name)
 
     def handleUserJoin(self, irc, msg):
-        channel, account, realname = msg.args
+        if len(msg.args) > 1:
+            channel, account, realname = msg.args
+        else:
+            channel, account, realname = (msg.args[0],'*','*')
         gameChannels = self.getChannels()    
         if msg.nick == irc.nick:
             return
@@ -357,7 +360,7 @@ class IrcPuzzles(callbacks.Plugin):
         if len(msg.args)>1:
             channel, account, realname = msg.args
         else:
-            channel = msg.args[0]
+            channel, account, realname = (msg.args[0],'*','*')
 
         if msg.nick == irc.nick:
             logger.debug('bot joined channel=%s, send WHO request for account names' % (channel,))
