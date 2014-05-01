@@ -52,8 +52,8 @@ except ImportError:
 import logging
 logger = logging.getLogger('ircpuzzles')
 owners = ['affiliated', 'yano', 'sdamashek', 'apoc', 'furry', 'JoseeAntonioR']
-ownerflags = '+AViortv'
-channelmlock = '+Ccntrs'
+ownerflags = '+AOiortv'
+channelmlock = '+Ccntrsmz'
 
 class IrcPuzzles(callbacks.Plugin):
     """A plugin to facilitate IRC Puzzles channel management and stats tracking"""
@@ -107,6 +107,8 @@ class IrcPuzzles(callbacks.Plugin):
         logger.info('part running game channels...')
         channels = [self._game.lobby.name]
         self.partChannel(irc, self._game.lobby.name)
+        irc.queueMsg(ircmsgs.privmsg("ChanServ","DROP %s" %
+            self._game.lobby.name))
         for track in self._game.tracks:
             for channel in track.channels:
                 self.partChannel(irc, channel.name)
@@ -370,8 +372,9 @@ class IrcPuzzles(callbacks.Plugin):
     def doNotice(self, irc, msg):
         logger.debug('notice from ' + msg.nick + ': ' + msg.args[1])
         if msg.nick.lower() == 'chanserv':
-            registered = re.findall('^([^ ]+) is now registered to',msg.args[1])
-            drop = re.findall('/msg ChanServ DROP ([^ ]*) ([^ ]*)', msg.args[1])
+            registeredregex = re.compile(ur'(#[^ ]+)\x02 is now registered to',re.UNICODE)
+            registered = registeredregex.findall(msg.args[1])
+            drop = re.findall('/msg ChanServ DROP ([^ ]+) ([A-Za-z0-9:]+)', msg.args[1])
             if registered:
                 channel = registered[0]
                 irc.queueMsg(ircmsgs.privmsg("ChanServ","FLAGS %s %s +O" % (channel, irc.nick)))
