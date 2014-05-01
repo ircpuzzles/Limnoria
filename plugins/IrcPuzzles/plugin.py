@@ -65,7 +65,13 @@ class IrcPuzzles(callbacks.Plugin):
 
     def processReload(self, irc):
         for (channel, c) in irc.state.channels.iteritems():
-            self.doJoin(irc, {'nick':irc.nick,'args':(channel,irc.nick,irc.nick)}) # Fake a join on reload to update cache
+            irc.queueMsg(ircmsgs.IrcMsg(command='WHO', args=(channel, '%na')))
+            if self._game:
+                channel_obj = self._game.get_channel(channel)
+                if channel_obj:
+                    self.joinedGameChannel(irc, channel_obj)
+            return
+
 
     def getRunningGame(self):
         """Return the Game instance of the running GameInfo record."""
