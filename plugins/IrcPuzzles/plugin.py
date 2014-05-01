@@ -92,7 +92,7 @@ class IrcPuzzles(callbacks.Plugin):
             return
         logger.info('join running game channels...')
         channels = [self._game.lobby.name]
-        self.joinChannel(irc, self._game.lobby.name)
+        self.joinChannel(irc, self._game.lobby.name,register=False)
         for track in self._game.tracks:
             for channel in track.channels:
                 self.joinChannel(irc, channel.name)
@@ -148,8 +148,11 @@ class IrcPuzzles(callbacks.Plugin):
         set the topic, op bot admins and (TODO) log users
         in the channel."""
 
+        if not self._game:
+            return
         irc.queueMsg(ircmsgs.topic(channel_obj.name, channel_obj.topic))
-        self.register(irc,channel_obj.name)
+        if channel_obj.name != self._game.lobby.name:
+            self.register(irc,channel_obj.name)
 
     def handleUserJoin(self, irc, msg):
         channel, account, realname = msg.args
@@ -350,6 +353,7 @@ class IrcPuzzles(callbacks.Plugin):
         joining a channel. We store the account name in _cache.
         Docs: http://ircv3.org/extensions/extended-join-3.1
         """
+        logger.debug('join: '+str(msg.args))
         if len(msg.args)>1:
             channel, account, realname = msg.args
         else:
