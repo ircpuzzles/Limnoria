@@ -109,7 +109,8 @@ class IrcPuzzles(callbacks.Plugin):
         self.partChannel(irc, self._game.lobby.name)
         for track in self._game.tracks:
             for channel in track.channels:
-                self.joinChannel(irc, channel.name)
+                self.partChannel(irc, channel.name)
+                irc.queueMsg(ircmsgs.privmsg("ChanServ","DROP %s" % channel))
                 channels.append(channel.name)
         logger.info('parted ' + ', '.join(channels))
         return channels
@@ -369,12 +370,16 @@ class IrcPuzzles(callbacks.Plugin):
     def doNotice(self, irc, msg):
         if msg.nick == 'ChanServ':
             registered = re.findall('^([^ ]+) is now registered to',msg.args[1].lower())
+            drop = re.findall('/msg ChanServ DROP ([^ ]*) ([^ ]*)', msg.args[1].lower())
             if registered:
                 channel = registered[0]
-                self.queueMsg(ircmsgs.privmsg("ChanServ","FLAGS %s %s +O" % (channel, irc.nick)))
+                irc.queueMsg(ircmsgs.privmsg("ChanServ","FLAGS %s %s +O" % (channel, irc.nick)))
                 for owner in owners:
-                    self.queueMsg(ircmsgs.privmsg("ChanServ","FLAGS %s %s %s" % (channel, owner, ownerflags)))
-                self.queueMsg(ircmsgs.privmsg("ChanServ","SET MLOCK %s %s" % (channel, channelmlock)))
+                    irc.queueMsg(ircmsgs.privmsg("ChanServ","FLAGS %s %s %s" % (channel, owner, ownerflags)))
+                irc.queueMsg(ircmsgs.privmsg("ChanServ","SET MLOCK %s %s" % (channel, channelmlock)))
+            if drop:
+                irc.queueMsg(ircmsgs.privmsg("ChanServ","DROP %s %s" % (drop[0][0],drop[0][1])))
+
 
 
 
