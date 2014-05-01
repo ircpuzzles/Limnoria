@@ -261,6 +261,7 @@ class IrcPuzzles(callbacks.Plugin):
             irc.reply("You are not identified to NickServ. Please identify and try again.")
             return
         account = self._cache[msg.nick]
+        logger.info("Nick %s (account %s) requesting confirmation" % (msg.nick,account))
         code_found = False
         users = list(session.query(User).filter(User.account == account))
         if len(users) < 1:
