@@ -266,7 +266,10 @@ class IrcPuzzles(callbacks.Plugin):
         joining a channel. We store the account name in _cache.
         Docs: http://ircv3.org/extensions/extended-join-3.1
         """
-        channel, account, realname = msg.args
+        if len(msg.args)>1:
+            channel, account, realname = msg.args
+        else:
+            channel = msg.args[0]
 
         if msg.nick == irc.nick:
             logger.debug('bot joined channel=%s, send WHO request for account names' % (channel,))
