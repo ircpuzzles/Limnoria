@@ -191,7 +191,7 @@ class IrcPuzzles(callbacks.Plugin):
             prev = channel_obj.prev
             if not prev:
                 logger.debug('user %s joined channel %s (first in track)' % (u,channel))
-                join = Join(user=u,channel=channel)
+                join = Join(user=u.id,channel=channel)
                 logger.debug('adding join obj for %s to %s' % (u,channel))
                 session.add(join)
                 session.commit()
