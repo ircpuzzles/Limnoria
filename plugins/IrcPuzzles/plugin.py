@@ -170,7 +170,7 @@ class IrcPuzzles(callbacks.Plugin):
             if account == '*':
                 irc.queueMsg(ircmsgs.kick(channel,msg.nick,'You must be identified with NickServ to play ircpuzzles.')) # Should never be reached as channels are +r
                 return
-            user = list(session.query(User).filter(User.account == account).filter(User.confirmed == True)
+            user = list(session.query(User).filter(User.account == account).filter(User.confirmed == True))
             if len(user) < 1:
                 irc.queueMsg(ircmsgs.kick(channel,msg.nick,'You must be registered with the bot to compete. Please register at http://ircpuzzles.org.'))
                 return
