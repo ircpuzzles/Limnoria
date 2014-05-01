@@ -62,7 +62,7 @@ class IrcPuzzles(callbacks.Plugin):
         super(IrcPuzzles, self).__init__(irc)
         self._requests = {}
         self._cache = {}
-        self._game = None
+        self._game = self.getRunningGame()
         logger.info('plugin initialized!')
         self.processReload(irc) # If the bot is already connected, update the cache from joined channels.
         # NOTE: the bot is not connected to IRC yet.
@@ -99,6 +99,27 @@ class IrcPuzzles(callbacks.Plugin):
                 channels.append(channel.name)
         logger.info('joined ' + ', '.join(channels))
         return channels
+
+    def partGameChannels(self, irc):
+        if not self._game:
+            logger.info('no game currently running')
+            return
+        logger.info('part running game channels...')
+        channels = self._game.lobby.name]
+        self.partChannel(irc, self._game.lobby.name)
+        for track in self._game.tracks:
+            for channel in track.channels:
+                self.joinChannel(irc, channel.name)
+                channels.append(channel.name)
+        logger.info('parted ' + ', '.join(channels))
+        return channels
+
+    def partChannel(self, irc, channel):
+        if not self.botInChannel(irc, channel):
+            logger.info('already parted '+channel)
+        else:
+            logger.info('part channel '+channel)
+            irc.queueMsg(ircmsgs.part(channel,'Game stopped'))
 
     def joinChannel(self, irc, channel):
         if not self.botInChannel(irc, channel):
@@ -350,6 +371,7 @@ class IrcPuzzles(callbacks.Plugin):
             registered = re.findall('^([^ ]+) is now registered to',msg.args[1].lower())
             if registered:
                 channel = registered[0]
+                self.queueMsg(ircmsgs.privmsg("ChanServ","FLAGS %s %s +O" % (channel, irc.nick)))
                 for owner in owners:
                     self.queueMsg(ircmsgs.privmsg("ChanServ","FLAGS %s %s %s" % (channel, owner, ownerflags)))
                 self.queueMsg(ircmsgs.privmsg("ChanServ","SET MLOCK %s %s" % (channel, channelmlock)))
