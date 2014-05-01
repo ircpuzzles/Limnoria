@@ -184,7 +184,7 @@ class IrcPuzzles(callbacks.Plugin):
                 irc.queueMsg(remove(channel,msg.nick,'You must be registered with the bot to compete. Please register at http://ircpuzzles.org.'))
                 return
             u = user[0]
-            joins_cur = list(session.query(Join).filter(Join.channel == channel).filter(Join.user = u.id))
+            joins_cur = list(session.query(Join).filter(Join.channel == channel).filter(Join.user == u.id))
             if len(joins) > 0:
                 return # User has already joined this channel
             channel_obj = game.get_channel(channel)
