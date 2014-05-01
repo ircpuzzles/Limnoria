@@ -30,6 +30,7 @@
 
 import time
 import sqlalchemy
+import re
 
 import supybot.utils as utils
 from supybot.commands import *
@@ -50,6 +51,9 @@ except ImportError:
 
 import logging
 logger = logging.getLogger('ircpuzzles')
+owners = ['affiliated', 'yano', 'sdamashek', 'apoc', 'furry', 'JoseeAntonioR']
+ownerflags = '+AViortv'
+channelmlock = '+Ccntrs'
 
 class IrcPuzzles(callbacks.Plugin):
     """A plugin to facilitate IRC Puzzles channel management and stats tracking"""
@@ -111,6 +115,10 @@ class IrcPuzzles(callbacks.Plugin):
         in the channel."""
 
         irc.queueMsg(ircmsgs.topic(channel_obj.name, channel_obj.topic))
+        self.register(irc,channel_obj.name)
+
+    def register(self, irc, channel):
+        irc.queueMsg(ircmsgs.privmsg("ChanServ","REGISTER %s" % channel))
 
     def do001(self, irc, msg):
         """Welcome to IRC, just after connecting to the irc server."""
@@ -321,6 +329,17 @@ class IrcPuzzles(callbacks.Plugin):
         else:
             logger.debug('account cache: set nick=%s with account=%s (account-notify)' % (msg.nick, account))
             self._cache[msg.nick] = account
+
+    def doNotice(self, irc, msg):
+        if msg.nick == 'ChanServ':
+            registered = re.findall('^([^ ]+) is now registered to',msg.args[1].lower())
+            if registered:
+                channel = registered[0]
+                for owner in owners:
+                    self.queueMsg(ircmsgs.privmsg("ChanServ","FLAGS %s %s %s" % (channel, owner, ownerflags)))
+                self.queueMsg(ircmsgs.privmsg("ChanServ","SET MLOCK %s %s" % (channel, channelmlock)))
+
+
 
 Class = IrcPuzzles
 
