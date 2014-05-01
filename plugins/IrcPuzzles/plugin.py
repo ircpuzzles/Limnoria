@@ -124,7 +124,7 @@ class IrcPuzzles(callbacks.Plugin):
         channels = []
         for track in self._game.tracks:
             for channel in track.channels:
-                channels.append(channel)
+                channels.append(channel.name)
         return channels
 
     def partChannel(self, irc, channel):
