@@ -368,6 +368,7 @@ class IrcPuzzles(callbacks.Plugin):
             self._cache[msg.nick] = account
 
     def doNotice(self, irc, msg):
+        logger.debug('notice from ' + msg.nick)
         if msg.nick.lower() == 'chanserv':
             registered = re.findall('^([^ ]+) is now registered to',msg.args[1].lower())
             drop = re.findall('/msg ChanServ DROP ([^ ]*) ([^ ]*)', msg.args[1].lower())
