@@ -186,7 +186,7 @@ class IrcPuzzles(callbacks.Plugin):
             if not prev:
                 logger.debug('user %s joined channel %s (first in track)' % (u,channel))
                 return # Channel is first in track, user is good
-            joins = list(session.query(Join).filter(Join.channel == channel).filter(Join.user == u.id))
+            joins = list(session.query(Join).filter(Join.channel == prev.name).filter(Join.user == u.id))
             if len(joins) < 1:
                 irc.queueMsg(ircmsgs.kick(channel,msg.nick,'You must complete tracks in order.'))
                 return
