@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, orm, Column, Integer, String, Boolean
+from sqlalchemy import create_engine, orm, Column, Integer, String, Boolean, ForeignKey, DateTime, func
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -40,7 +40,7 @@ class Join(Base):
     id = Column(Integer, primary_key=True)
     user = Column(Integer, ForeignKey('users.id'))
     channel = Column(String)
-    time = Column(db.DateTime, default=db.func.now())
+    time = Column(DateTime, default=func.now())
 
 
 Base.metadata.create_all(engine)
