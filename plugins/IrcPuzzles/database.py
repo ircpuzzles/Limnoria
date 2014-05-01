@@ -2,7 +2,7 @@ from sqlalchemy import create_engine, orm, Column, Integer, String, Boolean, For
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.ext.declarative import declarative_base
 
-engine = create_engine('sqlite:///ircpuzzles.db')
+engine = create_engine('sqlite:////home/ircpuzzles/ircpuzzles.db')
 session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
 Base = declarative_base()
 Base.query = session.query_property()
