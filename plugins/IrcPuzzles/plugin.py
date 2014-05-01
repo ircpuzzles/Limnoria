@@ -110,7 +110,7 @@ class IrcPuzzles(callbacks.Plugin):
         for track in self._game.tracks:
             for channel in track.channels:
                 self.partChannel(irc, channel.name)
-                irc.queueMsg(ircmsgs.privmsg("ChanServ","DROP %s" % channel))
+                irc.queueMsg(ircmsgs.privmsg("ChanServ","DROP %s" % channel.name))
                 channels.append(channel.name)
         logger.info('parted ' + ', '.join(channels))
         return channels
@@ -230,7 +230,7 @@ class IrcPuzzles(callbacks.Plugin):
             irc.reply('Stopping game: '+game.name)
             channels = self.partGameChannels(irc)
             irc.reply('Parted game channels: ' + ', '.join(channels))
-            res = session.query(GameInfo).filter(GameInfo.path == game.path)
+            res = session.query(GameInfo).filter(GameInfo.running == True)
             if res.count() > 0:
                 res.one().running = False
                 session.commit()
@@ -368,10 +368,10 @@ class IrcPuzzles(callbacks.Plugin):
             self._cache[msg.nick] = account
 
     def doNotice(self, irc, msg):
-        logger.debug('notice from ' + msg.nick)
+        logger.debug('notice from ' + msg.nick + ': ' + msg.args[1])
         if msg.nick.lower() == 'chanserv':
-            registered = re.findall('^([^ ]+) is now registered to',msg.args[1].lower())
-            drop = re.findall('/msg ChanServ DROP ([^ ]*) ([^ ]*)', msg.args[1].lower())
+            registered = re.findall('^([^ ]+) is now registered to',msg.args[1])
+            drop = re.findall('/msg ChanServ DROP ([^ ]*) ([^ ]*)', msg.args[1])
             if registered:
                 channel = registered[0]
                 irc.queueMsg(ircmsgs.privmsg("ChanServ","FLAGS %s %s +O" % (channel, irc.nick)))
