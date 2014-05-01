@@ -177,11 +177,11 @@ class IrcPuzzles(callbacks.Plugin):
                 irc.reply('Welcome %s! You must be identified to compete. All game channels are set +r.' % msg.nick) # Notify user as a friendly warning
         elif channel in gameChannels:
             if account == '*':
-                irc.queueMsg(ircmsgs.remove(channel,msg.nick,'You must be identified with NickServ to play ircpuzzles.')) # Should never be reached as channels are +r
+                irc.queueMsg(remove(channel,msg.nick,'You must be identified with NickServ to play ircpuzzles.')) # Should never be reached as channels are +r
                 return
             user = list(session.query(User).filter(User.account == account).filter(User.confirmed == True))
             if len(user) < 1:
-                irc.queueMsg(ircmsgs.remove(channel,msg.nick,'You must be registered with the bot to compete. Please register at http://ircpuzzles.org.'))
+                irc.queueMsg(remove(channel,msg.nick,'You must be registered with the bot to compete. Please register at http://ircpuzzles.org.'))
                 return
             u = user[0]
             channel_obj = game.get_channel(channel)
@@ -191,7 +191,7 @@ class IrcPuzzles(callbacks.Plugin):
                 return # Channel is first in track, user is good
             joins = list(session.query(Join).filter(Join.channel == prev.name).filter(Join.user == u.id))
             if len(joins) < 1:
-                irc.queueMsg(ircmsgs.remove(channel,msg.nick,'You must complete tracks in order.'))
+                irc.queueMsg(remove(channel,msg.nick,'You must complete tracks in order.'))
                 return
             join = Join(user=u,channel=channel)
             logger.debug('adding join obj for %s to %s' % (u,channel))
