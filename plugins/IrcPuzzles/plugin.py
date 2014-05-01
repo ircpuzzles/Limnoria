@@ -92,7 +92,7 @@ class IrcPuzzles(callbacks.Plugin):
             return
         logger.info('join running game channels...')
         channels = [self._game.lobby.name]
-        self.joinChannel(irc, self._game.lobby.name,register=False)
+        self.joinChannel(irc, self._game.lobby.name)
         for track in self._game.tracks:
             for channel in track.channels:
                 self.joinChannel(irc, channel.name)
