@@ -235,7 +235,6 @@ class IrcPuzzles(callbacks.Plugin):
                 session.commit()
             else:
                 irc.reply('Could not find game db object to stop.')
-                return
             self._game = None
             irc.reply('Game stopped.')
 
