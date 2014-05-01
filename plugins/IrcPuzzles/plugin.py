@@ -171,7 +171,7 @@ class IrcPuzzles(callbacks.Plugin):
         if channel == game.lobby.name:
             logger.debug('nick %s (account %s) joined lobby %s' % (msg.nick,account,channel))
             if account == '*':
-                irc.reply('Welcome %s! You must be identified to compete. All game channels are set +r.') # Notify user as a friendly warning
+                irc.reply('Welcome %s! You must be identified to compete. All game channels are set +r.' % msg.nick) # Notify user as a friendly warning
         elif channel in gameChannels:
             if account == '*':
                 irc.queueMsg(ircmsgs.kick(channel,msg.nick,'You must be identified with NickServ to play ircpuzzles.')) # Should never be reached as channels are +r
