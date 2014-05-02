@@ -77,10 +77,6 @@ class IrcPuzzles(callbacks.Plugin):
                 channel_obj = self._game.get_channel(channel)
                 if channel_obj:
                     self.joinedGameChannel(irc, channel_obj)
-                else:
-                    irc.queueMsg(ircmsgs.IrcMsg(command='WHO', args=(channel, '%na')))
-            else:
-                irc.queueMsg(ircmsgs.IrcMsg(command='WHO', args=(channel, '%na')))
             return
 
 
