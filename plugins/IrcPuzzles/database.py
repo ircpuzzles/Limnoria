@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine, orm, Column, Integer, String, Boolean, ForeignKey, DateTime, func
-from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.orm import sessionmaker, scoped_session, relationship
 from sqlalchemy.ext.declarative import declarative_base
 
 engine = create_engine('postgresql://ircpuzzles:ircpuzzles@localhost/ircpuzzles')
@@ -38,9 +38,11 @@ class Join(Base):
     __tablename__ = 'joins'
 
     id = Column(Integer, primary_key=True)
-    user = Column(Integer, ForeignKey('users.id'))
+    user_id = Column(Integer, ForeignKey(User.id))
+    user = relationship('User',foreign_keys='Join.user_id')
     channel = Column(String)
     time = Column(DateTime, default=func.now())
 
 
-Base.metadata.create_all(engine)
+def init_db():
+    Base.metadata.create_all(engine)
