@@ -184,23 +184,23 @@ class IrcPuzzles(callbacks.Plugin):
                 irc.queueMsg(remove(channel,msg.nick,'You must be registered with the bot to compete. Please register at http://ircpuzzles.org.'))
                 return
             u = user[0]
-            joins_cur = list(session.query(Join).filter(Join.channel == channel).filter(Join.user == u.id))
+            joins_cur = list(session.query(Join).filter(Join.channel == channel).filter(Join.user == u))
             if len(joins_cur) > 0:
                 return # User has already joined this channel
             channel_obj = game.get_channel(channel)
             prev = channel_obj.prev
             if not prev:
                 logger.debug('user %s joined channel %s (first in track)' % (u,channel))
-                join = Join(user=u.id,channel=channel)
+                join = Join(user=u,channel=channel)
                 logger.debug('adding join obj for %s to %s' % (u,channel))
                 session.add(join)
                 session.commit()
                 return # Channel is first in track, user is good
-            joins = list(session.query(Join).filter(Join.channel == prev.name).filter(Join.user == u.id))
+            joins = list(session.query(Join).filter(Join.channel == prev.name).filter(Join.user == u))
             if len(joins) < 1:
                 irc.queueMsg(remove(channel,msg.nick,'You must complete tracks in order.'))
                 return
-            join = Join(user=u.id,channel=channel)
+            join = Join(user=u,channel=channel)
             logger.debug('adding join obj for %s to %s' % (u,channel))
             session.add(join)
             session.commit()
