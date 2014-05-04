@@ -435,6 +435,12 @@ class IrcPuzzles(callbacks.Plugin):
         if account == '*' and msg.nick in self._cache:
             logger.debug('account cache: remove nick=%s (account-notify)' % (msg.nick,))
             del self._cache[msg.nick]
+            if self._game:
+                channels = self.getChannels()
+                for channel in channels:
+                    if msg.nick in irc.state.channels[channel].users:
+                        irc.queueMsg(remove(channel,msg.nick,'You unidentified. Please rejoin once you have identified.'))
+
         else:
             logger.debug('account cache: set nick=%s with account=%s (account-notify)' % (msg.nick, account))
             self._cache[msg.nick] = account
