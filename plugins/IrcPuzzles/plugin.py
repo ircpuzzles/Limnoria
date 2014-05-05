@@ -197,7 +197,8 @@ class IrcPuzzles(callbacks.Plugin):
                     if channel == chan:
                         the_track = track.name
                         the_number = idx
-            ircmsgs.privmsg(self._game.lobby.name, "%s joins channel %d in track %s" % (u,the_number,the_track))
+            joinmsg = ircmsgs.privmsg(self._game.lobby.name, "%s joins channel %d in track %s" % (u,the_number,the_track))
+            irc.queueMsg(joinmsg)
 
             if not prev:
                 logger.debug('user %s joined channel %s (first in track)' % (u,channel))
