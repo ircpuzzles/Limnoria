@@ -71,6 +71,7 @@ class IrcPuzzles(callbacks.Plugin):
         # NOTE: the bot is not connected to IRC yet.
 
     def updatecache(self, irc, msg, args):
+        """Update the cache."""
         for (channel, c) in irc.state.channels.iteritems():
             irc.queueMsg(ircmsgs.IrcMsg(command='WHO', args=(channel, '%na')))
             if self._game:
