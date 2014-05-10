@@ -67,10 +67,10 @@ class IrcPuzzles(callbacks.Plugin):
         self._cache = {}
         self._game = self.getRunningGame()
         logger.info('plugin initialized!')
-        self.reloadcache(irc, [], []) # If the bot is already connected, update the cache from joined channels.
+        self.reloadCache(irc, [], []) # If the bot is already connected, update the cache from joined channels.
         # NOTE: the bot is not connected to IRC yet.
 
-    def reloadcache(self, irc, msg, args):
+    def reloadCache(self, irc, msg, args):
         """Update the cache."""
         for (channel, c) in irc.state.channels.iteritems():
             irc.queueMsg(ircmsgs.IrcMsg(command='WHO', args=(channel, '%na')))
@@ -78,7 +78,7 @@ class IrcPuzzles(callbacks.Plugin):
                 channel_obj = self._game.get_channel(channel)
                 if channel_obj:
                     self.joinedGameChannel(irc, channel_obj)
-    updatecache = wrap(reloadcache, ['admin'])
+    updatecache = wrap(reloadCache, ['admin'])
 
     def getRunningGame(self):
         """Return the Game instance of the running GameInfo record."""
