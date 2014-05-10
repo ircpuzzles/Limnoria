@@ -175,6 +175,10 @@ class IrcPuzzles(callbacks.Plugin):
             logger.debug('nick %s (account %s) joined lobby %s' % (msg.nick,account,channel))
             if account == '*':
                 irc.reply('Welcome %s! You must be identified to compete. All game channels are set +r.' % msg.nick) # Notify user as a friendly warning
+            else:
+                user = session.query(User).filter(User.account == account).filter(User.confirmed == True).count()
+                if user:
+                    irc.queueMsg(ircmsgs.voice(channel, msg.nick))
         elif channel in gameChannels:
             if account == '*':
                 irc.queueMsg(remove(channel,msg.nick,'You must be identified with NickServ to play ircpuzzles.')) # Should never be reached as channels are +r
@@ -275,6 +279,9 @@ class IrcPuzzles(callbacks.Plugin):
         """<code>
 
         Confirm a user registration, you must be in a channel the bot is in."""
+        if not self.nickInAnyChannel(irc, msg.nick):
+            irc.reply("To confirm your account, you must be in a channel that I am in. Try joining #ircpuzzles.")
+            return
         if msg.nick not in self._cache:
             irc.reply("You are not identified to NickServ. Please identify and try again.")
             return
@@ -295,6 +302,9 @@ class IrcPuzzles(callbacks.Plugin):
                 session.query(User).filter(User.account == account).filter(User.id != user.id).delete()
                 session.commit()
                 irc.reply("Thank you, your account is now confirmed!")
+                if self._game:
+                    if msg.nick in irc.state.channels[self._game.lobby.name].users:
+                        irc.queueMsg(ircmsgs.voice(self._game.lobby.name,msg.nick))
                 return
 
         irc.reply("Incorrect confirmation code.")
