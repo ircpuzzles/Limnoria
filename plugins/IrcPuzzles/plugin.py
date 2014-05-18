@@ -194,22 +194,13 @@ class IrcPuzzles(callbacks.Plugin):
             channel_obj = game.get_channel(channel)
             prev = channel_obj.prev
 
-            the_track = None
-            the_number = 0
-            for track in self._game.tracks:
-                for idx, chan in enumerate(track.channels):
-                    if channel == chan.name:
-                        the_track = track.name
-                        the_number = idx
-            joinmsg = ircmsgs.privmsg(self._game.lobby.name, "%s joins channel %d in track %s" % (u.account,the_number,the_track))
-            irc.queueMsg(joinmsg)
-
             if not prev:
                 logger.debug('user %s joined channel %s (first in track)' % (u,channel))
                 join = Join(user=u,channel=channel)
                 logger.debug('adding join obj for %s to %s' % (u,channel))
                 session.add(join)
                 session.commit()
+                self.alert(irc, channel, u)
                 return # Channel is first in track, user is good
             joins = list(session.query(Join).filter(Join.channel == prev.name).filter(Join.user == u))
             if len(joins) < 1:
@@ -219,6 +210,18 @@ class IrcPuzzles(callbacks.Plugin):
             logger.debug('adding join obj for %s to %s' % (u,channel))
             session.add(join)
             session.commit()
+            self.alert(irc, channel, u)
+
+    def alert(self, irc, channel, u):
+        the_track = None
+        the_number = 0
+        for track in self._game.tracks:
+            for idx, chan in enumerate(track.channels):
+                if channel == chan.name:
+                    the_track = track.name
+                    the_number = idx
+        joinmsg = ircmsgs.privmsg(self._game.lobby.name, "%s joins channel %d in track %s" % (u.account, the_number, the_track))
+        irc.queueMsg(joinmsg)
         
     def register(self, irc, channel):
         irc.queueMsg(ircmsgs.privmsg("ChanServ","REGISTER %s" % channel))
