@@ -198,10 +198,10 @@ class IrcPuzzles(callbacks.Plugin):
             the_number = 0
             for track in self._game.tracks:
                 for idx, chan in enumerate(track.channels):
-                    if channel == chan:
+                    if channel == chan.name:
                         the_track = track.name
                         the_number = idx
-            joinmsg = ircmsgs.privmsg(self._game.lobby.name, "%s joins channel %d in track %s" % (u,the_number,the_track))
+            joinmsg = ircmsgs.privmsg(self._game.lobby.name, "%s joins channel %d in track %s" % (u.account,the_number,the_track))
             irc.queueMsg(joinmsg)
 
             if not prev:
