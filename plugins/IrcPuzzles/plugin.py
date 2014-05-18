@@ -176,14 +176,14 @@ class IrcPuzzles(callbacks.Plugin):
             if account == '*':
                 irc.reply('Welcome %s! You must be identified to compete. All game channels are set +r.' % msg.nick) # Notify user as a friendly warning
             else:
-                user = session.query(User).filter(User.account == account).filter(User.confirmed == True).count()
+                user = session.query(User).filter(User.account == account.lower()).filter(User.confirmed == True).count()
                 if user:
                     irc.queueMsg(ircmsgs.voice(channel, msg.nick))
         elif channel in gameChannels:
             if account == '*':
                 irc.queueMsg(remove(channel,msg.nick,'You must be identified with NickServ to play ircpuzzles.')) # Should never be reached as channels are +r
                 return
-            user = list(session.query(User).filter(User.account == account).filter(User.confirmed == True))
+            user = list(session.query(User).filter(User.account == account.lower()).filter(User.confirmed == True))
             if len(user) < 1:
                 irc.queueMsg(remove(channel,msg.nick,'You must be registered with the bot to compete. Please register at http://ircpuzzles.org.'))
                 return
@@ -285,7 +285,7 @@ class IrcPuzzles(callbacks.Plugin):
         if msg.nick not in self._cache:
             irc.reply("You are not identified to NickServ. Please identify and try again.")
             return
-        account = self._cache[msg.nick]
+        account = self._cache[msg.nick].lower()
         logger.info("Nick %s (account %s) requesting confirmation" % (msg.nick,account))
         code_found = False
         users = list(session.query(User).filter(User.account == account))
